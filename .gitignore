@@ -1,0 +1,31 @@
+# Node dependencies
+node_modules/
+frontend/node_modules/
+.pnp
+.pnp.js
+
+# Python virtual environment & cache
+backend/venv/
+backend/__pycache__/
+__pycache__/
+*.pyc
+
+# Local Database
+backend/cyberguard.db
+backend/app/cyberguard.db
+*.db
+
+# Build outputs
+frontend/dist/
+frontend/build/
+
+# Environment variables
+.env
+.env.local
+*.env
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
