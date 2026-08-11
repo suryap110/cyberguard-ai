@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
-import { Play, Zap } from 'lucide-react';
+import { Play, Zap, Plus, X, Terminal, CheckCircle2, ShieldCheck, RefreshCw } from 'lucide-react';
 import { ToastContainer, ToastMessage } from '../components/ui/Toast';
 
 export const PlaybooksPage: React.FC = () => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [runningPlaybookId, setRunningPlaybookId] = useState<string | null>(null);
   const [playbookLogs, setPlaybookLogs] = useState<Record<string, string[]>>({});
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
-  const playbooks = [
+  const [newTitle, setNewTitle] = useState('Custom Phishing Isolation Flow');
+  const [newTrigger, setNewTrigger] = useState('URL Risk Score >= 90');
+
+  const [playbooks, setPlaybooks] = useState([
     {
       id: 'pb-1',
       code: 'SOAR-PB-001',
@@ -50,7 +54,7 @@ export const PlaybooksPage: React.FC = () => {
       lastRun: '1 day ago',
       successRate: '100%'
     }
-  ];
+  ]);
 
   const addToast = (type: 'success' | 'warning' | 'error' | 'info', title: string, message: string) => {
     const id = Date.now().toString();
@@ -60,21 +64,44 @@ export const PlaybooksPage: React.FC = () => {
 
   const handleRunPlaybook = (id: string, title: string) => {
     setRunningPlaybookId(id);
-    setPlaybookLogs(prev => ({ ...prev, [id]: ['Initializing SOAR Engine...', 'Connecting to Edge Firewall API...'] }));
+    setPlaybookLogs(prev => ({ ...prev, [id]: ['[SOAR ENGINE] Initializing Playbook Pipeline...', '[SOAR ENGINE] Connecting to Edge Firewall API...'] }));
 
     setTimeout(() => {
       setPlaybookLogs(prev => ({
         ...prev,
         [id]: [
-          '✓ Injecting Firewall Rules...',
-          '✓ Revoking Session Tokens...',
-          '✓ Step-Up 2FA Enforced...',
-          '✓ SOAR Containment Playbook Executed Successfully!'
+          '[SOAR ENGINE] Initializing Playbook Pipeline...',
+          '[SOAR ENGINE] Connecting to Edge Firewall API...',
+          '✓ Step 1: Injecting Malicious Domain into DNS Sinkhole Firewall Rules...',
+          '✓ Step 2: Revoking Active OAuth JWT Session Tokens...',
+          '✓ Step 3: Enforcing Mandatory WebAuthn Biometric Step-Up...',
+          '✓ Step 4: SOAR Automated Containment Playbook Executed [100% SUCCESS]'
         ]
       }));
       setRunningPlaybookId(null);
-      addToast('success', 'Playbook Execution Complete', `Playbook '${title}' completed all 4 containment steps.`);
-    }, 1800);
+      addToast('success', 'Playbook Execution Complete', `Playbook '${title}' completed all containment steps.`);
+    }, 1200);
+  };
+
+  const handleCreatePlaybook = (e: React.FormEvent) => {
+    e.preventDefault();
+    const created = {
+      id: `pb-${Date.now()}`,
+      code: `SOAR-PB-00${playbooks.length + 1}`,
+      title: newTitle,
+      trigger: newTrigger,
+      steps: [
+        '1. Evaluate incoming threat telemetry score',
+        '2. Execute automated session token quarantine',
+        '3. Notify security operations command center'
+      ],
+      lastRun: 'Just now',
+      successRate: '100%'
+    };
+
+    setPlaybooks(prev => [created, ...prev]);
+    setShowCreateModal(false);
+    addToast('success', 'Custom SOAR Playbook Created', `Playbook ${created.code} published to automation registry.`);
   };
 
   return (
@@ -82,17 +109,27 @@ export const PlaybooksPage: React.FC = () => {
       <ToastContainer toasts={toasts} onClose={(id) => setToasts(prev => prev.filter(t => t.id !== id))} />
 
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-3">
-          <span className="px-2.5 py-1 rounded-full bg-cyan-500/20 text-cyan-400 font-mono text-xs font-bold border border-cyan-500/30">
-            SOAR AUTOMATION ENGINE V2.4
-          </span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#232D42] pb-6">
+        <div>
+          <div className="flex items-center gap-3">
+            <span className="px-2.5 py-1 rounded-full bg-cyan-500/20 text-cyan-400 font-mono text-xs font-bold border border-cyan-500/30">
+              SOAR AUTOMATION ENGINE V2.4
+            </span>
+          </div>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-white mt-2 flex items-center gap-3">
+            <Zap className="w-8 h-8 text-amber-400" />
+            AUTOMATED SOC INCIDENT RESPONSE PLAYBOOKS
+          </h1>
+          <p className="text-sm text-slate-400 mt-1">Orchestrate automated containment workflows across edge firewalls, authentication gateways, and banking APIs.</p>
         </div>
-        <h1 className="text-2xl md:text-3xl font-extrabold text-white mt-2 flex items-center gap-3">
-          <Zap className="w-8 h-8 text-amber-400" />
-          AUTOMATED SOC INCIDENT RESPONSE PLAYBOOKS
-        </h1>
-        <p className="text-sm text-slate-400 mt-1">Orchestrate automated containment workflows across edge firewalls, authentication gateways, and banking APIs.</p>
+
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-400 text-slate-950 font-extrabold text-xs shadow-cyber-glow hover:scale-105 transition-all flex items-center gap-2 shrink-0"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Create Custom SOAR Playbook</span>
+        </button>
       </div>
 
       {/* Playbooks List */}
@@ -112,7 +149,7 @@ export const PlaybooksPage: React.FC = () => {
                 className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-extrabold text-xs shadow-cyber-glow hover:scale-105 transition-all flex items-center gap-2 shrink-0 disabled:opacity-50"
               >
                 <Play className="w-4 h-4 fill-current" />
-                <span>{runningPlaybookId === pb.id ? 'EXECUTING PLAYBOOK...' : 'Run Automated Playbook'}</span>
+                <span>{runningPlaybookId === pb.id ? 'EXECUTING SOAR PIPELINE...' : 'Run Automated Playbook'}</span>
               </button>
             </div>
 
@@ -129,7 +166,11 @@ export const PlaybooksPage: React.FC = () => {
 
             {/* Execution Log */}
             {playbookLogs[pb.id] && (
-              <div className="p-4 rounded-2xl bg-[#080B11] border border-[#232D42] font-mono text-xs text-emerald-400 space-y-1">
+              <div className="p-4 rounded-2xl bg-[#080B11] border border-[#232D42] font-mono text-xs text-emerald-400 space-y-1.5 shadow-inner">
+                <div className="flex items-center justify-between border-b border-[#232D42] pb-1 text-slate-400">
+                  <span className="flex items-center gap-1.5 text-cyan-400"><Terminal className="w-3.5 h-3.5" /> Live SOAR Terminal Execution Log:</span>
+                  <span className="text-[10px]">SOAR Engine v2.4</span>
+                </div>
                 {playbookLogs[pb.id].map((log: string, i: number) => (
                   <p key={i}>{log}</p>
                 ))}
@@ -138,6 +179,54 @@ export const PlaybooksPage: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* CREATE CUSTOM PLAYBOOK MODAL */}
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
+          <div className="w-full max-w-md bg-[#0F1420] border border-[#232D42] rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#232D42] pb-3">
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <Zap className="w-5 h-5 text-amber-400" />
+                Publish Custom SOAR Playbook
+              </h3>
+              <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreatePlaybook} className="space-y-4 font-mono text-xs">
+              <div className="space-y-1">
+                <label className="text-slate-400">Playbook Title</label>
+                <input
+                  type="text"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  className="w-full p-3 rounded-xl bg-[#161D2F] border border-[#232D42] text-white focus:outline-none focus:border-cyan-400"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-slate-400">Trigger Condition Rule</label>
+                <input
+                  type="text"
+                  value={newTrigger}
+                  onChange={(e) => setNewTrigger(e.target.value)}
+                  className="w-full p-3 rounded-xl bg-[#161D2F] border border-[#232D42] text-white focus:outline-none focus:border-cyan-400"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-400 text-slate-950 font-extrabold text-xs shadow-cyber-glow hover:scale-105 transition-all mt-2"
+              >
+                PUBLISH PLAYBOOK TO REGISTRY
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

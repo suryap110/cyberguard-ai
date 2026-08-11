@@ -72,3 +72,7 @@ class AudioEngine {
 }
 
 export const audioEngine = new AudioEngine();
+
+// Export named functions for direct imports
+export const playSuccessChime = () => audioEngine.playSuccessChime();
+export const playThreatAlert = () => audioEngine.playThreatAlert();

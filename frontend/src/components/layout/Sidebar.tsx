@@ -4,7 +4,7 @@ import {
   ShieldAlert, LayoutDashboard, Link2, MessageSquare, QrCode, 
   CreditCard, UserCheck, Smartphone, Bell, Bot, Terminal, 
   Settings, ChevronLeft, ChevronRight, Play, Server,
-  Database, Zap, Building2, Lock, Cpu, Mic, FileCode
+  Database, Zap, Building2, Lock, Cpu, Mic, FileCode, Sparkles, Shield
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -40,18 +40,27 @@ export const Sidebar: React.FC = () => {
 
   return (
     <aside className={`relative flex flex-col h-screen bg-[#0F1420] border-r border-[#232D42] transition-all duration-300 z-30 ${collapsed ? 'w-20' : 'w-64'}`}>
-      {/* Brand Header */}
+      {/* Brand Header with Enhanced 3D Shield Badge & Icons */}
       <div className="flex items-center justify-between h-16 px-4 border-b border-[#232D42]">
         <div className="flex items-center gap-3 overflow-hidden">
-          <div className="p-2 rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-400 text-white shadow-cyber-glow">
-            <ShieldAlert className="w-6 h-6 animate-pulse" />
+          {/* Official High-Tech Glowing Shield & AI Sparkle Badge */}
+          <div className="relative p-2.5 rounded-2xl bg-gradient-to-tr from-cyan-600 via-sky-500 to-emerald-400 text-slate-950 shadow-cyber-glow ring-2 ring-cyan-400/40 flex items-center justify-center shrink-0">
+            <ShieldAlert className="w-6 h-6 text-slate-950 animate-pulse" />
+            <Sparkles className="w-3.5 h-3.5 text-amber-300 absolute -top-1 -right-1 drop-shadow-md" />
+            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#0F1420] animate-ping"></span>
           </div>
+
           {!collapsed && (
             <div>
-              <h1 className="font-extrabold text-lg tracking-wider text-white flex items-center gap-1">
-                CYBERGUARD<span className="text-cyan-400">AI</span>
-              </h1>
-              <p className="text-[10px] text-sky-400 font-mono tracking-widest uppercase">Detect. Explain. Prevent.</p>
+              <div className="flex items-center gap-1.5">
+                <h1 className="font-extrabold text-base tracking-wider text-white flex items-center gap-1 leading-none">
+                  CYBERGUARD<span className="text-cyan-400">AI</span>
+                </h1>
+                <span className="px-1.5 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-[9px] font-mono font-bold text-cyan-300 flex items-center gap-0.5">
+                  <Cpu className="w-2.5 h-2.5 text-cyan-400 animate-spin" /> PRO
+                </span>
+              </div>
+              <p className="text-[10px] text-sky-400 font-mono tracking-widest uppercase mt-0.5">Detect. Explain. Prevent.</p>
             </div>
           )}
         </div>
@@ -102,7 +111,7 @@ export const Sidebar: React.FC = () => {
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `flex items-center justify-between px-3 py-2.5 rounded-xl font-medium text-sm transition-all ${
+                  `flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all justify-between ${
                     isActive 
                       ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30 shadow-cyber-glow' 
                       : 'text-slate-300 hover:bg-[#161D2F] hover:text-white'

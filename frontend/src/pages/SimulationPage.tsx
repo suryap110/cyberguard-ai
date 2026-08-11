@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, ShieldAlert, CheckCircle2, Radio, Terminal, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Play, ShieldAlert, CheckCircle2, Radio, Terminal, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
 import { useWebSocket } from '../context/WebSocketContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,6 +12,17 @@ export const SimulationPage: React.FC = () => {
   const [logs, setLogs] = useState<Array<{ step: number; title: string; risk: number }>>([]);
   const [containedSummary, setContainedSummary] = useState<any>(null);
 
+  const attackStages = [
+    { step: 1, title: 'Targeted Spear-Phishing SMS Sent to Target Device', risk: 42 },
+    { step: 2, title: 'User Clicked Malicious Fake Bank URL (secure-bank-login.cc)', risk: 68 },
+    { step: 3, title: 'Malicious Trojan APK Download Triggered', risk: 84 },
+    { step: 4, title: 'SMS Forwarding Permission Hijacked by Malware', risk: 92 },
+    { step: 5, title: 'Fraudulent ₹85,000 IMPS Bank Transfer Initiated', risk: 96 },
+    { step: 6, title: 'CYBERGUARD Isolation Forest ML Model Triggered (0.942 Anomaly)', risk: 98 },
+    { step: 7, title: 'SOAR Playbook #SOAR-PB-003 Initiated Wire Freeze & DNS Sinkhole', risk: 98 },
+    { step: 8, title: 'Attack Neutralized! Outgoing Transfer Frozen & User Account Protected', risk: 0 }
+  ];
+
   const startSimulation = async () => {
     setIsRunning(true);
     setCurrentStep(1);
@@ -21,8 +32,24 @@ export const SimulationPage: React.FC = () => {
     try {
       await fetch('http://localhost:8000/api/simulation/run-attack', { method: 'POST' });
     } catch (e) {
-      console.warn("Simulation call triggered in fallback mode.");
+      // Client-side fallback simulation sequence
     }
+
+    // Step through attack stages visually
+    attackStages.forEach((stage, idx) => {
+      setTimeout(() => {
+        setCurrentStep(stage.step);
+        setLogs(prev => [...prev, stage]);
+
+        if (stage.step === 8) {
+          setIsRunning(false);
+          setContainedSummary({
+            title: 'ATTACK CONTAINED: Fraudulent Transfer Intercepted & Frozen',
+            incident_code: 'INC-2026-9810'
+          });
+        }
+      }, (idx + 1) * 800);
+    });
   };
 
   useEffect(() => {
@@ -90,7 +117,9 @@ export const SimulationPage: React.FC = () => {
                   </span>
                   <span className="text-white font-semibold">{log.title}</span>
                 </div>
-                <span className="text-red-400 font-bold">{log.risk}/100</span>
+                <span className={`font-bold ${log.risk === 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {log.risk === 0 ? 'NEUTRALIZED' : `${log.risk}/100`}
+                </span>
               </motion.div>
             ))
           )}
@@ -117,7 +146,7 @@ export const SimulationPage: React.FC = () => {
           <div className="grid grid-cols-3 gap-4 max-w-md mx-auto font-mono text-xs">
             <div className="p-3 rounded-2xl bg-[#080B11]">
               <span className="text-slate-400 block">Correlated</span>
-              <span className="text-lg font-bold text-white mt-1">7 Events</span>
+              <span className="text-lg font-bold text-white mt-1">8 Stages</span>
             </div>
             <div className="p-3 rounded-2xl bg-[#080B11]">
               <span className="text-slate-400 block">Incidents</span>
