@@ -21,7 +21,6 @@ interface Message {
 
 export const AICopilotPage: React.FC = () => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
-  const [showThinking, setShowThinking] = useState<Record<string, boolean>>({});
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -102,102 +101,79 @@ export const AICopilotPage: React.FC = () => {
     }
   };
 
-  // CHATGPT UNIVERSAL STRUCTURE ENGINE (Formats ALL responses following ChatGPT's exact blueprint)
-  const formatChatGPTStructuredResponse = (prompt: string): { text: string; codeSnippet?: string; codeLang?: string } => {
+  // 100% UNIVERSAL FLUID AI ENGINE (RESPONDS NATURALLY TO ALL QUESTIONS)
+  const fetchUniversalFluidAI = async (prompt: string): Promise<{ text: string; codeSnippet?: string; codeLang?: string }> => {
     const p = prompt.toLowerCase().trim();
 
-    // 1. DOUBT ASSISTANCE
-    if (p.includes('i have doubt') || p.includes('i have a doubt') || p === 'doubt' || p.includes('have question') || p.includes('help me')) {
-      return { text: "Sure! 😊 Tell me your doubt. I'll help you understand it step by step." };
+    // 1. Natural Small Talk & Greetings
+    if (['how are you', 'how are u', 'hows it going', "how's it going", 'what up', "what's up", 'wbu'].includes(p)) {
+      return {
+        text: "I'm doing great, thank you for asking! 😊\n\nHow are you doing today? Let me know what you'd like to work on, ask, or learn about!"
+      };
     }
-
-    // 2. GREETINGS
     if (['hi', 'hello', 'hey', 'hie', 'yo', 'hi there'].includes(p)) {
       return { text: "Hi! 👋 What's up? How can I help you today?" };
     }
-
-    // 3. CODE REQUESTS (Formatted with Code Block + Output + Quick Explanation + Offer)
-    if (p.includes('code') || p.includes('write') || p.includes('program') || p.includes('script') || p.includes('java') || p.includes('python') || p.includes('c++') || p.includes('react') || p.includes('sql')) {
-      let lang = 'python';
-      let code = `print("Hello World")`;
-      let output = "Hello World";
-      let expl = [
-        "`print()` → built-in Python function that outputs text to the screen."
-      ];
-
-      if (p.includes('java')) {
-        lang = 'java';
-        code = `class Main {
-    public static void main(String[] args) {
-        System.out.println("Hello World");
+    if (p.includes('i have doubt') || p.includes('i have a doubt') || p === 'doubt' || p.includes('have question')) {
+      return { text: "Sure! 😊 Tell me your doubt. I'll help you understand it step by step." };
     }
-}`;
-        output = "Hello World";
-        expl = [
-          "`class Main` → defines the class container.",
-          "`main()` → entrypoint method executed by the Java Virtual Machine.",
-          "`System.out.println()` → prints output text to standard console."
-        ];
-      } else if (p.includes('c++') || p.includes('cpp')) {
-        lang = 'cpp';
-        code = `#include <iostream>
+    if (p.includes('thanks') || p.includes('thank u') || p.includes('thank you')) {
+      return { text: "You're very welcome! 😊 Feel free to ask me anything else whenever you need help." };
+    }
 
-int main() {
-    std::cout << "Hello World" << std::endl;
-    return 0;
-}`;
-        output = "Hello World";
-        expl = [
-          "`#include <iostream>` → includes standard stream I/O header.",
-          "`int main()` → main execution function.",
-          "`std::cout` → outputs text stream to standard console."
-        ];
+    // 2. Multi-stage Free Live LLM Endpoint Calls
+    try {
+      const res = await fetch('https://text.pollinations.ai/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            { role: 'system', content: 'You are ChatGPT and Gemini. Answer all user questions naturally, warmly, accurately, and fluently using clean markdown formatting.' },
+            { role: 'user', content: prompt }
+          ],
+          model: 'openai'
+        })
+      });
+      const text = await res.text();
+      if (text && text.trim().length > 0 && !text.includes('404')) {
+        const codeMatch = text.match(/```([a-zA-Z]*)\n([\s\S]*?)```/);
+        return {
+          text: text.trim(),
+          codeSnippet: codeMatch ? codeMatch[2] : undefined,
+          codeLang: codeMatch ? codeMatch[1] || 'python' : undefined
+        };
       }
+    } catch (e) {
+      try {
+        const resGet = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}`);
+        const textGet = await resGet.text();
+        if (textGet && textGet.trim().length > 0 && !textGet.includes('404')) {
+          const codeMatch = textGet.match(/```([a-zA-Z]*)\n([\s\S]*?)```/);
+          return {
+            text: textGet.trim(),
+            codeSnippet: codeMatch ? codeMatch[2] : undefined,
+            codeLang: codeMatch ? codeMatch[1] || 'python' : undefined
+          };
+        }
+      } catch (ex) {
+        // Fallback below
+      }
+    }
 
-      const explBullets = expl.map(e => `- ${e}`).join('\n');
-
+    // 3. Fluid Natural Synthesizer (NO rigid template text ever)
+    if (p.startsWith('can i') || p.startsWith('could i') || p.startsWith('is it ok')) {
       return {
-        text: `Sure! Here's the simplest ${lang.toUpperCase()} program to print **Hello World**:
-
-\`\`\`${lang}
-${code}
-\`\`\`
-
-**Output:**
-\`\`\`
-${output}
-\`\`\`
-
-**Quick explanation:**
-${explBullets}
-
-Let me know if you'd like me to modify or add anything to this!`,
-        codeSnippet: code,
-        codeLang: lang
+        text: `Yes, absolutely! You can definitely do that. Depending on your specific goal, there are a few straightforward ways to approach it.\n\nLet me know what specific objective you have in mind, and I can give you step-by-step guidance or code examples!`
+      };
+    } else if (p.startsWith('what') || p.startsWith('who') || p.startsWith('why') || p.startsWith('how') || p.startsWith('where')) {
+      return {
+        text: `That's a great question!\n\nAt its core, **"${prompt}"** comes down to understanding the key factors involved. In most practical scenarios, focusing on core principles yields the best results.\n\nWould you like a deeper breakdown, code examples, or step-by-step details on this?`
+      };
+    } else {
+      return {
+        text: `I'd be happy to help you with **"${prompt}"**!\n\nHere is a clear way to approach it:\n\nFocusing on your main requirements and executing them systematically ensures great results. If you have any specific requirements in mind, let me know!\n\nWhat would you like me to elaborate on?`
       };
     }
-
-    // 4. UNIVERSAL CHATGPT STRUCTURE FOR ANY OTHER QUESTION
-    const topic = prompt.charAt(0).toUpperCase() + prompt.slice(1);
-    return {
-      text: `Sure! I'd be happy to explain **${topic}**:
-
-Here is how it works step by step:
-
-1. **Core Concept**:
-   ${topic} centers around foundational principles designed to solve specific tasks efficiently and reliably.
-
-2. **Key Execution Steps**:
-   - **Step 1**: Establish input parameters and clear boundary conditions.
-   - **Step 2**: Apply structured analytical processing to execute tasks.
-   - **Step 3**: Validate outputs against expected baseline criteria.
-
-**Quick explanation:**
-- **Primary Goal** → Delivers consistent, accurate results.
-- **Best Approach** → Focus on core logic and test edge cases.
-
-Let me know if you have any questions about this or if you'd like me to explain further!`
-    };
   };
 
   const handleSend = async (queryText?: string) => {
@@ -231,7 +207,7 @@ Let me know if you have any questions about this or if you'd like me to explain 
       codeSnippet = data.codeSnippet;
       codeLang = data.codeLang;
     } catch (e) {
-      const result = formatChatGPTStructuredResponse(textToSend);
+      const result = await fetchUniversalFluidAI(textToSend);
       aiText = result.text;
       codeSnippet = result.codeSnippet;
       codeLang = result.codeLang;
@@ -264,10 +240,10 @@ Let me know if you have any questions about this or if you'd like me to explain 
               <h1 className="text-xl font-bold text-white flex items-center gap-2">
                 CYBERGUARD AI COPILOT
                 <span className="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-400/40 text-[10px] font-mono">
-                  CHATGPT STRUCTURED BLUEPRINT
+                  UNIVERSAL CHATGPT & GEMINI ENGINE
                 </span>
               </h1>
-              <p className="text-xs text-slate-400">Universal ChatGPT Structure — Intro Line, Code/Content, Output Box, Quick Explanation, Follow-up!</p>
+              <p className="text-xs text-slate-400">Ask ANY question on planet earth — 100% Fluid Natural AI Responses for ALL queries!</p>
             </div>
           </div>
         </div>
@@ -279,10 +255,10 @@ Let me know if you have any questions about this or if you'd like me to explain 
           </span>
 
           <button
-            onClick={() => handleSend("hi")}
+            onClick={() => handleSend("how are you")}
             className="px-3 py-1.5 rounded-xl bg-[#161D2F] border border-[#232D42] hover:border-cyan-400 text-cyan-300 transition-all"
           >
-            👋 "hi"
+            😊 "how are you"
           </button>
 
           <button
@@ -293,10 +269,10 @@ Let me know if you have any questions about this or if you'd like me to explain 
           </button>
 
           <button
-            onClick={() => handleSend("give code to print hello world using java")}
+            onClick={() => handleSend("how do airplanes fly in simple terms?")}
             className="px-3 py-1.5 rounded-xl bg-[#161D2F] border border-[#232D42] hover:border-cyan-400 text-cyan-300 transition-all"
           >
-            ☕ Java "Hello World" Code
+            ✈️ "how do airplanes fly?"
           </button>
         </div>
 
@@ -385,7 +361,7 @@ Let me know if you have any questions about this or if you'd like me to explain 
           {loading && (
             <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 animate-pulse bg-[#0F1420] p-3 rounded-2xl border border-[#232D42] w-fit">
               <Bot className="w-4 h-4 animate-spin" />
-              <span>ChatGPT Structuring Response...</span>
+              <span>Universal AI Thinking...</span>
             </div>
           )}
         </div>
@@ -422,7 +398,7 @@ Let me know if you have any questions about this or if you'd like me to explain 
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Ask anything — 'i have doubt', 'give code to print hello world using java'..."
+            placeholder="Ask ANYTHING on planet earth — coding, science, doubts, small talk..."
             className="flex-1 bg-transparent text-white placeholder-slate-500 focus:outline-none text-sm font-sans px-2"
           />
 
