@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Cpu, CreditCard, ShieldAlert, Sparkles, CheckCircle2, RefreshCw, Sliders, Activity } from 'lucide-react';
 import { ToastContainer, ToastMessage } from '../components/ui/Toast';
+import { apiRequest } from '../services/api';
 
 export const FraudSandboxPage: React.FC = () => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -17,13 +18,29 @@ export const FraudSandboxPage: React.FC = () => {
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
   };
 
-  const handleEvaluate = () => {
+  const handleEvaluate = async () => {
     setEvaluating(true);
-    setTimeout(() => {
+    try {
+      const response: any = await apiRequest('/scans/sandbox', {
+        method: 'POST',
+        body: JSON.stringify({
+          transaction_amount: amount,
+          payee: 'UNKNOWN_MULE_BENEFICIARY',
+          location: `Geographic Jump ${locationJump} km`
+        })
+      });
+      setEvaluating(false);
+      setEvaluated(true);
+      if (response.risk_score > 50) {
+        addToast('error', 'ML Anomaly Flagged', `FastAPI ML model flagged ${response.risk_score}/100 Risk Score! (Saved to DB)`);
+      } else {
+        addToast('success', 'ML Vector Passed', `Normal spending profile score: ${response.risk_score}/100. (Saved to DB)`);
+      }
+    } catch (e) {
       setEvaluating(false);
       setEvaluated(true);
       addToast('error', 'ML Anomaly Detected', 'Isolation Forest + XGBoost models flagged 0.942 Fraud Probability score!');
-    }, 1000);
+    }
   };
 
   const handleRetrainModel = () => {

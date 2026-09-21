@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   CreditCard, ShieldAlert, CheckCircle2, AlertTriangle, ArrowUpRight, 
   X, Plus, Sparkles, Trash2, Edit3, Filter, Search, RefreshCw, Activity, Check, AlertCircle,
-  Lock, Wallet, ArrowDownRight, Download, Share2, Keypad
+  Lock, Wallet, ArrowDownRight, Download, Share2, Key
 } from 'lucide-react';
 import { Transaction } from '../types';
 import { ToastContainer, ToastMessage } from '../components/ui/Toast';
@@ -17,16 +17,28 @@ export const TransactionPage: React.FC = () => {
   // Real Bank Account Balance State
   const [userBalance, setUserBalance] = useState(145280.00);
 
+  // Saved Secret 6-Digit Security PIN (Stored in LocalStorage, default '123456')
+  const [secretPin, setSecretPin] = useState<string>(() => {
+    return localStorage.getItem('cyberguard_upi_pin') || '123456';
+  });
+
   // Modals state
   const [showAddModal, setShowAddModal] = useState(false);
   const [showPinModal, setShowPinModal] = useState(false);
+  const [showSetPinModal, setShowSetPinModal] = useState(false);
+
+  // PIN Form States
+  const [newPin, setNewPin] = useState(['', '', '', '', '', '']);
+  const [confirmPin, setConfirmPin] = useState(['', '', '', '', '', '']);
+  const [pinErrorMessage, setPinErrorMessage] = useState<string | null>(null);
+
   const [pendingTxnData, setPendingTxnData] = useState<any>(null);
   const [upiPin, setUpiPin] = useState(['', '', '', '', '', '']);
   const [editingTxn, setEditingTxn] = useState<Transaction | null>(null);
 
   // Form State for Add / Edit
-  const [formAmount, setFormAmount] = useState('4500');
-  const [formPayee, setFormPayee] = useState('merchant@paytm');
+  const [formAmount, setFormAmount] = useState('2500');
+  const [formPayee, setFormPayee] = useState('merchant@okicici');
   const [formMethod, setFormMethod] = useState('UPI');
   const [formCategory, setFormCategory] = useState('Shopping & Retail');
   const [formLocation, setFormLocation] = useState('Chennai, TN (Trusted Device)');
@@ -97,7 +109,32 @@ export const TransactionPage: React.FC = () => {
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
   };
 
-  // STEP 1: Initiate Payment Form Submit (Opens UPI 6-Digit PIN Pad)
+  // SAVE NEW SECRET PIN
+  const handleSaveNewPin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPinErrorMessage(null);
+    const pinStr = newPin.join('');
+    const confirmStr = confirmPin.join('');
+
+    if (pinStr.length < 6) {
+      setPinErrorMessage('Please enter a complete 6-digit PIN.');
+      return;
+    }
+
+    if (pinStr !== confirmStr) {
+      setPinErrorMessage('PINs do not match! Please verify your 6-digit PIN.');
+      return;
+    }
+
+    setSecretPin(pinStr);
+    localStorage.setItem('cyberguard_upi_pin', pinStr);
+    setShowSetPinModal(false);
+    setNewPin(['', '', '', '', '', '']);
+    setConfirmPin(['', '', '', '', '', '']);
+    addToast('success', 'Security PIN Saved', `Your secret 6-digit Security PIN is now set to '${pinStr}'. This PIN is required for all future payments.`);
+  };
+
+  // STEP 1: Initiate Payment Form Submit (Opens 6-Digit PIN Pad)
   const handleInitiatePayment = (e: React.FormEvent) => {
     e.preventDefault();
     const amountNum = parseFloat(formAmount) || 1000;
@@ -117,16 +154,27 @@ export const TransactionPage: React.FC = () => {
 
     setShowAddModal(false);
     setUpiPin(['', '', '', '', '', '']);
+    setPinErrorMessage(null);
     setShowPinModal(true);
   };
 
-  // STEP 2: Confirm UPI Security PIN & Process AI Interception
+  // STEP 2: Confirm UPI Security PIN & Strict PIN Validation
   const handleConfirmUpiPin = () => {
-    if (upiPin.join('').length < 6) {
-      addToast('warning', 'Invalid UPI PIN', 'Please enter your complete 6-digit UPI security PIN.');
+    const enteredPin = upiPin.join('');
+    if (enteredPin.length < 6) {
+      addToast('warning', 'Incomplete PIN', 'Please enter all 6 digits of your UPI security PIN.');
       return;
     }
 
+    // STRICT VALIDATION AGAINST SET SECRET PIN
+    if (enteredPin !== secretPin) {
+      setPinErrorMessage(`Incorrect PIN! Entered '${enteredPin}' does not match your set PIN.`);
+      addToast('error', 'Incorrect Security PIN', `Access Denied! Entered PIN '${enteredPin}' is invalid. Please try again or reset your PIN.`);
+      setUpiPin(['', '', '', '', '', '']);
+      return;
+    }
+
+    // PIN MATCHES VALIDATED!
     setShowPinModal(false);
     const amountNum = pendingTxnData.amount;
     const isHighRisk = amountNum > 20000 || pendingTxnData.payee.includes('unknown') || pendingTxnData.payee.includes('crypto');
@@ -145,7 +193,7 @@ export const TransactionPage: React.FC = () => {
       is_anomaly: isHighRisk,
       ai_verdict: isHighRisk 
         ? `ERR_ANOMALY_SPIKE: Amount (₹${amountNum.toLocaleString()}) exceeds baseline limit. Intercepted by CYBERGUARD AI.`
-        : 'NORMAL_SETTLEMENT: Authenticated via UPI 6-Digit PIN. Passed NPCI clearance.',
+        : `NORMAL_SETTLEMENT: Authenticated via valid 6-Digit PIN '${secretPin}'. Passed NPCI clearance.`,
       created_at: 'Just now'
     };
 
@@ -153,7 +201,7 @@ export const TransactionPage: React.FC = () => {
 
     if (!isHighRisk) {
       setUserBalance(prev => prev - amountNum);
-      addToast('success', 'Payment Successful', `₹${amountNum.toLocaleString()} sent to ${pendingTxnData.payee}. Updated balance: ₹${(userBalance - amountNum).toLocaleString()}`);
+      addToast('success', 'PIN Authenticated & Payment Settled', `₹${amountNum.toLocaleString()} sent to ${pendingTxnData.payee}. Updated balance: ₹${(userBalance - amountNum).toLocaleString()}`);
     } else {
       addToast('error', 'FRAUD INTERCEPTED & FROZEN', `CYBERGUARD AI blocked ₹${amountNum.toLocaleString()} transfer to ${pendingTxnData.payee}. Money protected!`);
     }
@@ -161,7 +209,7 @@ export const TransactionPage: React.FC = () => {
     setReceiptTxn(newTxn);
   };
 
-  // UPDATE TRANSACTION (Edit)
+  // UPDATE TRANSACTION
   const handleUpdateTransaction = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingTxn) return;
@@ -255,20 +303,31 @@ export const TransactionPage: React.FC = () => {
             <Wallet className="w-7 h-7" />
           </div>
           <div>
-            <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">HDFC Savings Bank Account</span>
+            <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">HDFC Savings Account • PIN: <strong className="text-cyan-400">{secretPin}</strong></span>
             <p className="text-2xl font-extrabold text-white font-mono mt-0.5">₹{userBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
           </div>
-          <button
-            onClick={() => {
-              setFormAmount('2500');
-              setFormPayee('merchant@okicici');
-              setShowAddModal(true);
-            }}
-            className="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-400 text-slate-950 font-extrabold text-xs shadow-cyber-glow hover:scale-105 transition-all flex items-center gap-1.5 ml-2"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Send Money</span>
-          </button>
+
+          <div className="flex items-center gap-2 ml-2">
+            <button
+              onClick={() => { setPinErrorMessage(null); setShowSetPinModal(true); }}
+              className="px-3.5 py-3 rounded-2xl bg-[#161D2F] border border-[#232D42] hover:border-amber-400 text-amber-300 font-mono text-xs font-bold transition-all flex items-center gap-1.5"
+            >
+              <Key className="w-4 h-4 text-amber-400" />
+              <span>Set PIN</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setFormAmount('2500');
+                setFormPayee('merchant@okicici');
+                setShowAddModal(true);
+              }}
+              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-400 text-slate-950 font-extrabold text-xs shadow-cyber-glow hover:scale-105 transition-all flex items-center gap-1.5"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Send Money</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -419,6 +478,96 @@ export const TransactionPage: React.FC = () => {
         </div>
       </div>
 
+      {/* MODAL 0: SET / RESET SECRET 6-DIGIT SECURITY PIN */}
+      {showSetPinModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
+          <div className="w-full max-w-sm bg-[#0F1420] border border-amber-500/40 rounded-3xl p-6 shadow-2xl space-y-5 text-center font-mono text-xs">
+            <div className="p-3.5 rounded-2xl bg-amber-500/10 text-amber-400 w-fit mx-auto border border-amber-500/30">
+              <Key className="w-8 h-8" />
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-white font-sans">Set Your Secret 6-Digit Security PIN</h3>
+              <p className="text-xs text-slate-400 mt-1">This PIN will be required to authenticate all bank transfers.</p>
+            </div>
+
+            {pinErrorMessage && (
+              <div className="p-2.5 rounded-xl bg-red-500/20 text-red-400 border border-red-500/30 text-[11px]">
+                {pinErrorMessage}
+              </div>
+            )}
+
+            <form onSubmit={handleSaveNewPin} className="space-y-4 text-left">
+              <div className="space-y-1">
+                <label className="text-slate-400">Enter New 6-Digit PIN</label>
+                <div className="flex justify-between gap-2">
+                  {[0, 1, 2, 3, 4, 5].map(idx => (
+                    <input
+                      key={idx}
+                      id={`new-pin-${idx}`}
+                      type="password"
+                      maxLength={1}
+                      value={newPin[idx]}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const copy = [...newPin];
+                        copy[idx] = val;
+                        setNewPin(copy);
+                        if (val && idx < 5) {
+                          document.getElementById(`new-pin-${idx + 1}`)?.focus();
+                        }
+                      }}
+                      className="w-10 h-12 bg-[#161D2F] border border-[#232D42] rounded-xl text-center font-bold text-cyan-400 focus:border-cyan-400 text-lg focus:outline-none"
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-slate-400">Confirm 6-Digit PIN</label>
+                <div className="flex justify-between gap-2">
+                  {[0, 1, 2, 3, 4, 5].map(idx => (
+                    <input
+                      key={idx}
+                      id={`confirm-pin-${idx}`}
+                      type="password"
+                      maxLength={1}
+                      value={confirmPin[idx]}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const copy = [...confirmPin];
+                        copy[idx] = val;
+                        setConfirmPin(copy);
+                        if (val && idx < 5) {
+                          document.getElementById(`confirm-pin-${idx + 1}`)?.focus();
+                        }
+                      }}
+                      className="w-10 h-12 bg-[#161D2F] border border-[#232D42] rounded-xl text-center font-bold text-emerald-400 focus:border-emerald-400 text-lg focus:outline-none"
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowSetPinModal(false)}
+                  className="flex-1 py-3 rounded-2xl bg-[#161D2F] border border-[#232D42] text-slate-400 font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-extrabold shadow-cyber-glow"
+                >
+                  Save Secret PIN
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* MODAL 1: INITIATE PAYMENT FORM */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in">
@@ -484,7 +633,7 @@ export const TransactionPage: React.FC = () => {
       {/* MODAL 2: 6-DIGIT UPI SECURITY PIN KEYPAD */}
       {showPinModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-          <div className="w-full max-w-sm bg-[#0F1420] border border-[#232D42] rounded-3xl p-6 shadow-2xl space-y-6 text-center">
+          <div className="w-full max-w-sm bg-[#0F1420] border border-[#232D42] rounded-3xl p-6 shadow-2xl space-y-5 text-center">
             <div className="p-3.5 rounded-2xl bg-cyan-500/10 text-cyan-400 w-fit mx-auto border border-cyan-500/30">
               <Lock className="w-8 h-8" />
             </div>
@@ -492,7 +641,16 @@ export const TransactionPage: React.FC = () => {
             <div>
               <h3 className="text-lg font-bold text-white">Enter 6-Digit UPI PIN</h3>
               <p className="text-xs text-slate-400 mt-1">Paying <span className="text-white font-bold">₹{pendingTxnData?.amount?.toLocaleString()}</span> to <span className="text-cyan-400 font-bold">{pendingTxnData?.payee}</span></p>
+              <p className="text-[10px] font-mono text-cyan-400 mt-0.5">Your Current Set PIN: <strong>{secretPin}</strong></p>
             </div>
+
+            {/* Error Message Alert */}
+            {pinErrorMessage && (
+              <div className="p-2.5 rounded-xl bg-red-500/20 border border-red-500/40 text-red-300 font-mono text-xs flex items-center justify-center gap-1.5 animate-pulse">
+                <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                <span>{pinErrorMessage}</span>
+              </div>
+            )}
 
             {/* 6 PIN Display Circles */}
             <div className="flex justify-center gap-3">
@@ -516,6 +674,7 @@ export const TransactionPage: React.FC = () => {
                   onClick={() => {
                     if (key === 'C') {
                       setUpiPin(['', '', '', '', '', '']);
+                      setPinErrorMessage(null);
                     } else if (key === '✓') {
                       handleConfirmUpiPin();
                     } else {
@@ -524,6 +683,7 @@ export const TransactionPage: React.FC = () => {
                         const newPin = [...upiPin];
                         newPin[firstEmpty] = key;
                         setUpiPin(newPin);
+                        setPinErrorMessage(null);
                       }
                     }
                   }}
@@ -538,6 +698,21 @@ export const TransactionPage: React.FC = () => {
                   {key}
                 </button>
               ))}
+            </div>
+
+            <div className="pt-2 border-t border-[#232D42] flex justify-between text-xs font-mono">
+              <button
+                onClick={() => { setShowPinModal(false); setShowSetPinModal(true); }}
+                className="text-amber-400 hover:underline"
+              >
+                Change / Reset PIN?
+              </button>
+              <button
+                onClick={() => setShowPinModal(false)}
+                className="text-slate-400 hover:text-white"
+              >
+                Cancel Transfer
+              </button>
             </div>
           </div>
         </div>

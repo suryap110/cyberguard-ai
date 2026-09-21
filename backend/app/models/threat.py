@@ -56,3 +56,91 @@ class QRScan(Base):
     severity = Column(String(50), nullable=False)
     analysis = Column(Text)
     scanned_at = Column(DateTime, default=datetime.utcnow)
+
+class DeepfakeScan(Base):
+    __tablename__ = "deepfake_scans"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    filename = Column(String(255), nullable=False)
+    scan_type = Column(String(50), default="VOICE") # VOICE, DOCUMENT
+    risk_score = Column(Integer, nullable=False)
+    confidence = Column(Float, default=0.98)
+    verdict = Column(String(100), nullable=False) # DEEPFAKE_SYNTHETIC, GENUINE
+    synthetic_harmonics = Column(JSON, default=list)
+    spectral_summary = Column(Text)
+    scanned_at = Column(DateTime, default=datetime.utcnow)
+
+class APKScan(Base):
+    __tablename__ = "apk_scans"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    filename = Column(String(255), nullable=False)
+    package_name = Column(String(255), nullable=False)
+    risk_score = Column(Integer, nullable=False)
+    severity = Column(String(50), nullable=False) # SAFE, HIGH, CRITICAL
+    dangerous_permissions = Column(JSON, default=list)
+    malware_family = Column(String(100))
+    summary = Column(Text)
+    scanned_at = Column(DateTime, default=datetime.utcnow)
+
+class SimGuardScan(Base):
+    __tablename__ = "sim_guard_scans"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    phone_number = Column(String(50), nullable=False)
+    sim_status = Column(String(50), default="ACTIVE") # ACTIVE, SWAP_ALERT, SUSPICIOUS
+    imsi_changed = Column(Integer, default=0) # 0 or 1
+    sim_age_days = Column(Integer, default=450)
+    risk_score = Column(Integer, nullable=False)
+    carrier = Column(String(100))
+    alert_summary = Column(Text)
+    scanned_at = Column(DateTime, default=datetime.utcnow)
+
+class DarkWebIntel(Base):
+    __tablename__ = "dark_web_intel"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    target_query = Column(String(255), nullable=False)
+    breach_count = Column(Integer, default=0)
+    passwords_leaked = Column(Integer, default=0)
+    highest_severity = Column(String(50), default="MEDIUM")
+    matched_databases = Column(JSON, default=list)
+    summary = Column(Text)
+    searched_at = Column(DateTime, default=datetime.utcnow)
+
+class SandboxScan(Base):
+    __tablename__ = "sandbox_scans"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    transaction_amount = Column(Float, nullable=False)
+    payee = Column(String(255), nullable=False)
+    location = Column(String(255))
+    risk_score = Column(Integer, nullable=False)
+    is_anomaly = Column(Integer, default=0)
+    anomaly_reasons = Column(JSON, default=list)
+    ai_verdict = Column(Text)
+    scanned_at = Column(DateTime, default=datetime.utcnow)
+
+class ZeroTrustPolicy(Base):
+    __tablename__ = "zero_trust_policies"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    policy_code = Column(String(50), unique=True, nullable=False)
+    name = Column(String(255), nullable=False)
+    category = Column(String(100), nullable=False)
+    enforcement_level = Column(String(50), default="HIGH") # STRICT, BALANCED, MONITOR
+    is_active = Column(Integer, default=1)
+    description = Column(Text)
+    updated_at = Column(DateTime, default=datetime.utcnow)
+
+class PlaybookExecution(Base):
+    __tablename__ = "playbook_executions"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    playbook_id = Column(String(50), nullable=False)
+    playbook_name = Column(String(255), nullable=False)
+    target_incident = Column(String(100))
+    status = Column(String(50), default="EXECUTED") # EXECUTED, IN_PROGRESS, FAILED
+    actions_taken = Column(JSON, default=list)
+    executed_at = Column(DateTime, default=datetime.utcnow)
+

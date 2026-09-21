@@ -16,10 +16,20 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     const root = document.documentElement;
+    const body = document.body;
+
     if (theme === 'dark') {
       root.classList.add('dark');
+      root.classList.remove('light-mode');
+      body.classList.remove('light-mode');
+      body.style.backgroundColor = '#080B11';
+      body.style.color = '#F8FAFC';
     } else {
       root.classList.remove('dark');
+      root.classList.add('light-mode');
+      body.classList.add('light-mode');
+      body.style.backgroundColor = '#F1F5F9';
+      body.style.color = '#0F172A';
     }
     localStorage.setItem('cyberguard_theme', theme);
   }, [theme]);

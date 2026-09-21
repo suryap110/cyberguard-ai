@@ -30,7 +30,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
     { title: 'Suspicious Wire Transfer ₹85,000 (TXN-8291)', type: 'Transaction', path: '/transactions', icon: CreditCard, category: 'Transactions' },
     { title: 'Phishing Domain: secure-bank-verify-login.com', type: 'URL Threat', path: '/scanner/url', icon: Link2, category: 'Threats' },
     { title: 'Open Enterprise SOC Command Center', type: 'SOC Mode', path: '/soc', icon: Terminal, category: 'Navigation' },
-    { title: 'Run Full Hackathon Attack Simulation', type: 'Simulator', path: '/simulation', icon: ShieldAlert, category: 'Simulation' },
+    { title: 'Run Full Cyber Attack Simulation', type: 'Simulator', path: '/simulation', icon: ShieldAlert, category: 'Simulation' },
   ].filter(r => r.title.toLowerCase().includes(query.toLowerCase()));
 
   const handleSelect = (path: string) => {

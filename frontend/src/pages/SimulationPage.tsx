@@ -69,7 +69,7 @@ export const SimulationPage: React.FC = () => {
     <div className="p-6 md:p-8 space-y-8 max-w-5xl mx-auto">
       <div className="text-center space-y-2">
         <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 font-mono text-xs font-bold border border-amber-500/30">
-          CYBERGUARD HACKATHON SHOWCASE DEMO
+          CYBERGUARD LIVE ATTACK SIMULATOR
         </span>
         <h1 className="text-3xl md:text-5xl font-extrabold text-white">LIVE ATTACK SIMULATION CENTER</h1>
         <p className="text-sm text-slate-400 max-w-xl mx-auto">

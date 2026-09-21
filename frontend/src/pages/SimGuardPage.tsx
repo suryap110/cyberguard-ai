@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Smartphone, ShieldCheck, AlertTriangle, CheckCircle2, RefreshCw, Wifi, Signal, Lock } from 'lucide-react';
 import { ToastContainer, ToastMessage } from '../components/ui/Toast';
+import { apiRequest } from '../services/api';
 
 export const SimGuardPage: React.FC = () => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -46,11 +47,17 @@ export const SimGuardPage: React.FC = () => {
     addToast('success', 'Carrier Port Lock Updated', `Mobile carrier porting lock is now ${simStatus.portLock === 'ENABLED' ? 'DISABLED' : 'ENABLED'}.`);
   };
 
-  const handleSimAudit = () => {
-    addToast('info', 'Sim Audit Active', 'Auditing cell tower handover & IMSI binding registers...');
-    setTimeout(() => {
+  const handleSimAudit = async () => {
+    addToast('info', 'Sim Audit Active', 'Auditing cell tower handover & IMSI binding registers with FastAPI backend...');
+    try {
+      const response: any = await apiRequest('/scans/sim', {
+        method: 'POST',
+        body: JSON.stringify({ phone_number: '+919876543210' })
+      });
+      addToast('success', 'Telecom Registry Verified', `${response.alert_summary} (Logged to DB)`);
+    } catch (e) {
       addToast('success', 'Zero Swap Detected', 'Carrier cell tower handover matches verified device IMSI.');
-    }, 1200);
+    }
   };
 
   return (

@@ -1,7 +1,7 @@
 import logging
 from sqlalchemy.orm import Session
 from app.models.user import User, Device
-from app.models.threat import ThreatEvent, URLScan
+from app.models.threat import ThreatEvent, URLScan, ZeroTrustPolicy
 from app.models.transaction import Transaction
 from app.models.incident import Incident
 from app.models.audit import SystemHealth
@@ -97,6 +97,13 @@ def seed_initial_data(db: Session):
     h3 = SystemHealth(component="AI Engine", status="Operational", latency_ms=45.0, uptime_percentage=99.95)
     h4 = SystemHealth(component="WebSockets", status="Operational", latency_ms=8.0, uptime_percentage=100.00)
     db.add_all([h1, h2, h3, h4])
+
+    # 6. Zero-Trust Default Policies
+    zt1 = ZeroTrustPolicy(policy_code="ZT-001", name="Strict Device Fingerprint Verification", category="Identity", enforcement_level="HIGH", is_active=1, description="Require hardware token for any new browser fingerprint.")
+    zt2 = ZeroTrustPolicy(policy_code="ZT-002", name="Real-Time IMSI Swap Detection", category="Mobile Security", enforcement_level="STRICT", is_active=1, description="Block OTP logins if SIM card swapped within 48 hours.")
+    zt3 = ZeroTrustPolicy(policy_code="ZT-003", name="Geographic Velocity Anomaly Block", category="Transactions", enforcement_level="STRICT", is_active=1, description="Auto-freeze funds if login distance velocity exceeds 800km/h.")
+    zt4 = ZeroTrustPolicy(policy_code="ZT-004", name="Zero-Trust Microsegmentation Sandbox", category="Infrastructure", enforcement_level="BALANCED", is_active=1, description="Isolate untrusted API calls in ephemeral container sandbox.")
+    db.add_all([zt1, zt2, zt3, zt4])
 
     db.commit()
     logger.info("CYBERGUARD AI seed data successfully committed!")

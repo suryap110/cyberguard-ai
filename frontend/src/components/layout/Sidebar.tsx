@@ -1,151 +1,194 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { 
-  ShieldAlert, LayoutDashboard, Link2, MessageSquare, QrCode, 
-  CreditCard, UserCheck, Smartphone, Bell, Bot, Terminal, 
-  Settings, ChevronLeft, ChevronRight, Play, Server,
-  Database, Zap, Building2, Lock, Cpu, Mic, FileCode, Sparkles, Shield
+  Shield, LayoutDashboard, ShieldAlert, Activity, Network, Bot, 
+  FileText, Settings, ChevronLeft, ChevronRight, QrCode, Mic, 
+  FileCode, Smartphone, Link2, MessageSquare, CreditCard, UserCheck,
+  Database, Zap, Cpu, Play, Lock, Server, Building2, ChevronDown, Sparkles,
+  Swords, Crosshair, Award, Flame, Box, LogOut
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { soundFx } from '../../utils/audioSfx';
 
 export const Sidebar: React.FC = () => {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
-  const { user } = useAuth();
+  const [showArmory, setShowArmory] = useState(true);
 
-  const consumerNav = [
-    { name: 'Overview', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'UPI Fraud & Spoof', path: '/upi-guard', icon: QrCode, highlight: true },
-    { name: 'Deepfake AI Voice', path: '/deepfake-detector', icon: Mic },
-    { name: 'WhatsApp APK Guard', path: '/apk-scanner', icon: FileCode },
-    { name: 'SIM Swap Defense', path: '/sim-guard', icon: Smartphone },
-    { name: 'URL Scanner', path: '/scanner/url', icon: Link2 },
-    { name: 'Message Scanner', path: '/scanner/message', icon: MessageSquare },
-    { name: 'Transactions', path: '/transactions', icon: CreditCard },
-    { name: 'Identity Security', path: '/identity', icon: UserCheck },
-    { name: 'Alert Center', path: '/alerts', icon: Bell },
-    { name: 'AI Copilot', path: '/copilot', icon: Bot },
+  // Gamified Primary Navigation Links
+  const primaryNav = [
+    { name: 'QUEST HQ (SOC)', path: '/soc', icon: Swords },
+    { name: 'THREAT RADAR', path: '/alerts', icon: Crosshair },
+    { name: 'WAR ROOM (SIM)', path: '/simulation', icon: Play },
+    { name: 'CYBER NETWORK', path: '/network', icon: Network },
+    { name: 'AI COMPANION', path: '/copilot', icon: Bot, badge: 'LVL 99' },
+    { name: 'ACHIEVEMENTS', path: '/security-report', icon: Award },
+    { name: 'SETTINGS', path: '/settings', icon: Settings },
   ];
 
-  const socNav = [
-    { name: 'SOC Command Center', path: '/soc', icon: Terminal, badge: 'LIVE' },
-    { name: 'Dark Web Intel', path: '/threat-intel', icon: Database },
-    { name: 'SOAR Playbooks', path: '/playbooks', icon: Zap },
-    { name: 'Enterprise Risk', path: '/enterprise-risk', icon: Building2 },
-    { name: 'Zero-Trust Guard', path: '/zero-trust', icon: Lock },
-    { name: 'ML Fraud Sandbox', path: '/fraud-sandbox', icon: Cpu },
-    { name: 'Autonomous AI Agent', path: '/autonomous-agent', icon: Bot },
-    { name: 'Attack Simulator', path: '/simulation', icon: Play },
-    { name: 'System Health', path: '/admin/health', icon: Server },
+  // 16 Security Armory Equipment Modules
+  const securityModules = [
+    { name: 'UPI Fraud Shield', path: '/upi-guard', icon: QrCode, rarity: 'MYTHIC' },
+    { name: 'Deepfake AI Voice', path: '/deepfake-detector', icon: Mic, rarity: 'LEGENDARY' },
+    { name: 'APK Guard', path: '/apk-scanner', icon: FileCode, rarity: 'EPIC' },
+    { name: 'SIM Swap Defense', path: '/sim-guard', icon: Smartphone, rarity: 'RARE' },
+    { name: 'URL Scanner', path: '/scanner/url', icon: Link2, rarity: 'MYTHIC' },
+    { name: 'Message Scanner', path: '/scanner/message', icon: MessageSquare, rarity: 'LEGENDARY' },
+    { name: 'QR Code Scanner', path: '/scanner/qr', icon: QrCode, rarity: 'EPIC' },
+    { name: 'Identity Leak Vault', path: '/identity', icon: UserCheck, rarity: 'MYTHIC' },
+    { name: 'Dark Web Intel', path: '/threat-intel', icon: Database, rarity: 'MYTHIC' },
+    { name: 'SOAR Playbooks', path: '/playbooks', icon: Zap, rarity: 'LEGENDARY' },
+    { name: 'ML Sandbox', path: '/fraud-sandbox', icon: Cpu, rarity: 'EPIC' },
+    { name: 'Attack Simulator', path: '/simulation', icon: Play, rarity: 'MYTHIC' },
+    { name: 'Zero-Trust Guard', path: '/zero-trust', icon: Lock, rarity: 'LEGENDARY' },
+    { name: 'System Health', path: '/admin/health', icon: Server, rarity: 'RARE' },
+    { name: 'Incident Console', path: '/incidents', icon: ShieldAlert, rarity: 'EPIC' },
+    { name: 'Executive Report', path: '/security-report', icon: FileText, rarity: 'MYTHIC' },
   ];
 
   return (
-    <aside className={`relative flex flex-col h-screen bg-[#0F1420] border-r border-[#232D42] transition-all duration-300 z-30 ${collapsed ? 'w-20' : 'w-64'}`}>
-      {/* Brand Header with Enhanced 3D Shield Badge & Icons */}
-      <div className="flex items-center justify-between h-16 px-4 border-b border-[#232D42]">
-        <div className="flex items-center gap-3 overflow-hidden">
-          {/* Official High-Tech Glowing Shield & AI Sparkle Badge */}
-          <div className="relative p-2.5 rounded-2xl bg-gradient-to-tr from-cyan-600 via-sky-500 to-emerald-400 text-slate-950 shadow-cyber-glow ring-2 ring-cyan-400/40 flex items-center justify-center shrink-0">
-            <ShieldAlert className="w-6 h-6 text-slate-950 animate-pulse" />
-            <Sparkles className="w-3.5 h-3.5 text-amber-300 absolute -top-1 -right-1 drop-shadow-md" />
-            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#0F1420] animate-ping"></span>
+    <aside className={`relative flex flex-col h-screen bg-[#070B14]/90 backdrop-blur-2xl border-r border-amber-500/40 transition-all duration-200 z-30 shrink-0 shadow-[0_0_30px_rgba(245,158,11,0.15)] ${collapsed ? 'w-20' : 'w-64'}`}>
+      {/* Brand Header - Animus VR Core */}
+      <div className="flex items-center justify-between h-16 px-4 border-b border-amber-500/40 bg-[#0B1220]/90 relative overflow-hidden">
+        <div className="animus-scanline" />
+        <NavLink to="/soc" className="flex items-center gap-3 overflow-hidden group" onClick={() => soundFx.playLaserScan()}>
+          <div className="relative p-2.5 rounded-xl bg-[#101827] border border-amber-500/70 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.4)] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <Flame className="w-5 h-5 text-amber-400 fill-amber-400 animate-pulse" />
+            <span className="absolute inset-0 rounded-xl border border-amber-400/40 animate-ping opacity-40 pointer-events-none"></span>
           </div>
 
           {!collapsed && (
             <div>
-              <div className="flex items-center gap-1.5">
-                <h1 className="font-extrabold text-base tracking-wider text-white flex items-center gap-1 leading-none">
-                  CYBERGUARD<span className="text-cyan-400">AI</span>
-                </h1>
-                <span className="px-1.5 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-[9px] font-mono font-bold text-cyan-300 flex items-center gap-0.5">
-                  <Cpu className="w-2.5 h-2.5 text-cyan-400 animate-spin" /> PRO
-                </span>
-              </div>
-              <p className="text-[10px] text-sky-400 font-mono tracking-widest uppercase mt-0.5">Detect. Explain. Prevent.</p>
+              <h1 className="font-black text-xs tracking-wide text-white flex items-center gap-1 font-orbitron leading-none">
+                CYBERGUARD <span className="text-amber-400">AI</span>
+              </h1>
+              <p className="text-[9px] text-cyan-400 font-mono tracking-widest uppercase mt-1 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+                <span>CYBERGUARD AI 100%</span>
+              </p>
             </div>
           )}
-        </div>
+        </NavLink>
         <button 
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-[#161D2F] transition-colors"
+          onClick={() => { soundFx.playClick(); setCollapsed(!collapsed); }}
+          className="p-1.5 rounded-lg text-amber-400/70 hover:text-amber-300 hover:bg-amber-500/20 transition-colors cursor-pointer"
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          {collapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
       </div>
 
-      {/* Navigation Sections */}
-      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
-        {/* Consumer Guard Section */}
-        <div>
-          {!collapsed && <p className="px-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Consumer Guard</p>}
-          <nav className="space-y-1">
-            {consumerNav.map(item => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all ${
-                    isActive 
-                      ? 'bg-sky-500/10 text-cyan-400 border border-sky-500/30 shadow-cyber-glow' 
-                      : item.highlight
-                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                      : 'text-slate-300 hover:bg-[#161D2F] hover:text-white'
-                  }`
-                }
-              >
-                <item.icon className="w-5 h-5 shrink-0" />
-                {!collapsed && <span>{item.name}</span>}
-              </NavLink>
-            ))}
-          </nav>
+      {/* Core Quest Navigation Items */}
+      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1.5 font-mono">
+        <div className="px-3 pb-2 text-[10px] font-bold tracking-wider text-amber-400 uppercase flex items-center justify-between font-orbitron">
+          <span>{!collapsed ? '🛡️ CYBERGUARD AI' : 'CYBERGUARD'}</span>
+          {!collapsed && <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/40 text-[8px]">RANK: S+</span>}
         </div>
 
-        {/* Enterprise SOC Section */}
-        <div>
-          {!collapsed && <p className="px-3 text-[11px] font-semibold text-amber-400/90 uppercase tracking-wider mb-2 flex items-center justify-between">
-            Enterprise SOC
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-          </p>}
-          <nav className="space-y-1">
-            {socNav.map(item => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all justify-between ${
-                    isActive 
-                      ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30 shadow-cyber-glow' 
-                      : 'text-slate-300 hover:bg-[#161D2F] hover:text-white'
-                  }`
-                }
-              >
-                <div className="flex items-center gap-3">
-                  <item.icon className="w-5 h-5 shrink-0 text-amber-400" />
-                  {!collapsed && <span>{item.name}</span>}
-                </div>
-                {!collapsed && item.badge && (
-                  <span className="px-1.5 py-0.5 text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 rounded">
+        {primaryNav.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            title={item.name}
+            onClick={() => soundFx.playLaserScan()}
+            className={({ isActive }) =>
+              `flex items-center gap-3.5 px-3.5 py-2.5 text-xs transition-all relative group animus-button-clip ${
+                isActive 
+                  ? 'bg-gradient-to-r from-amber-500/30 via-cyan-500/20 to-purple-500/20 text-amber-300 border border-amber-500/80 shadow-[0_0_20px_rgba(245,158,11,0.5)] font-bold font-orbitron' 
+                  : 'text-slate-300 hover:bg-[#0B1220] hover:text-amber-300 border border-amber-500/20'
+              }`
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <item.icon className={`w-4 h-4 shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-amber-400' : 'text-slate-400 group-hover:text-amber-400'}`} />
+                {!collapsed && <span className="truncate tracking-wide">{item.name}</span>}
+
+                {item.badge && !collapsed && (
+                  <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/40 font-orbitron">
                     {item.badge}
                   </span>
                 )}
-              </NavLink>
-            ))}
-          </nav>
+
+                {/* Golden Eagle Sync Active Indicator Bar */}
+                {isActive && (
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-amber-400 rounded-r shadow-[0_0_12px_#F59E0B]" />
+                )}
+              </>
+            )}
+          </NavLink>
+        ))}
+
+        {/* Collapsible Security Armory Equipment Header */}
+        <div className="pt-4 px-1">
+          <button 
+            onClick={() => { soundFx.playClick(); setShowArmory(!showArmory); }}
+            className="w-full flex items-center justify-between px-2.5 py-1.5 text-[10px] font-bold tracking-wider text-amber-400 hover:text-white uppercase transition-colors"
+          >
+            <span className="flex items-center gap-1.5"><Box className="w-3.5 h-3.5" /> {!collapsed ? '🛡️ SECURITY ARMORY' : 'ARMORY'}</span>
+            {!collapsed && <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showArmory ? 'rotate-180' : ''}`} />}
+          </button>
         </div>
+
+        {showArmory && securityModules.map((module) => (
+          <NavLink
+            key={module.path}
+            to={module.path}
+            title={module.name}
+            onClick={() => soundFx.playClick()}
+            className={({ isActive }) =>
+              `flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-all relative ${
+                isActive 
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/50 font-bold shadow-cyber-glow' 
+                  : 'text-[#94A3B8] hover:bg-[#101827] hover:text-white'
+              }`
+            }
+          >
+            <div className="flex items-center gap-2.5 truncate">
+              <module.icon className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
+              {!collapsed && <span className="truncate text-[11px] font-mono">{module.name}</span>}
+            </div>
+
+            {!collapsed && (
+              <span className={`text-[8px] font-extrabold px-1 rounded ${
+                module.rarity === 'MYTHIC' ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' : 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
+              }`}>
+                {module.rarity}
+              </span>
+            )}
+          </NavLink>
+        ))}
       </div>
 
-      {/* Footer / Settings */}
-      <div className="p-3 border-t border-[#232D42]">
-        <NavLink
-          to="/settings"
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all ${
-              isActive ? 'bg-sky-500/10 text-cyan-400' : 'text-slate-400 hover:bg-[#161D2F] hover:text-white'
-            }`
-          }
+      {/* Bottom Gaming Status Bar */}
+      <div className="p-3 border-t border-[#1E293B] bg-[#0B1220] font-mono text-xs space-y-2">
+        <div className="flex items-center justify-between text-[10px] text-slate-400">
+          <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            SHIELD ACTIVE
+          </span>
+          <span className="text-amber-400 font-bold">XP 148.5k</span>
+        </div>
+        {!collapsed && (
+          <div className="w-full bg-[#101827] h-1.5 rounded-full overflow-hidden border border-[#1E293B]">
+            <div className="bg-gradient-to-r from-cyan-400 via-purple-500 to-amber-400 h-full w-[94%] shadow-cyber-glow"></div>
+          </div>
+        )}
+
+        {/* Sign Out Action Button */}
+        <button
+          onClick={() => {
+            soundFx.playClick();
+            logout();
+            navigate('/login');
+          }}
+          title="Sign Out"
+          className="w-full py-2 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-400 text-red-400 font-mono text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-cyber-glow cursor-pointer"
         >
-          <Settings className="w-5 h-5 shrink-0" />
-          {!collapsed && <span>Settings & Auth</span>}
-        </NavLink>
+          <LogOut className="w-3.5 h-3.5" />
+          {!collapsed && <span>Sign Out</span>}
+        </button>
       </div>
     </aside>
   );

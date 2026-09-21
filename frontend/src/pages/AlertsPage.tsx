@@ -1,84 +1,90 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
-  Bell, ShieldAlert, AlertTriangle, CheckCircle2, X, Zap, Shield, Filter, 
-  Trash2, Play, Download, Search, CheckCheck, Radio, Sparkles, Terminal, Activity, FileText 
+  ShieldAlert, Search, Filter, CheckCircle2, Zap, FileText, Trash2, 
+  CheckCheck, ShieldCheck, ArrowUpRight, ChevronRight
 } from 'lucide-react';
 import { ToastContainer, ToastMessage } from '../components/ui/Toast';
-import { playSuccessChime, playThreatAlert } from '../utils/audio';
 
-export interface AlertItem {
+export interface ThreatItem {
   id: string;
-  title: string;
-  msg: string;
-  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
-  category: 'Phishing' | 'Account Takeover' | 'Transaction Fraud' | 'Malware APK' | 'SIM Swap';
-  mitreCode: string;
-  time: string;
-  status: 'UNRESOLVED' | 'CONTAINED' | 'INVESTIGATING';
-  sourceIp?: string;
-  targetUser?: string;
-  evidenceData?: any;
+  name: string;
+  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'SAFE';
+  type: string;
+  sourceIp: string;
+  destination: string;
+  detectionTime: string;
+  confidence: number;
+  aiAnalysis: string;
+  status: 'BLOCKED' | 'CONTAINED' | 'ACTIVE';
 }
 
 export const AlertsPage: React.FC = () => {
+  const navigate = useNavigate();
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
-  const [filterSeverity, setFilterSeverity] = useState<'ALL' | 'CRITICAL' | 'HIGH' | 'MEDIUM'>('ALL');
-  const [filterStatus, setFilterStatus] = useState<'ALL' | 'UNRESOLVED' | 'CONTAINED'>('ALL');
+  const [filterSeverity, setFilterSeverity] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedAlert, setSelectedAlert] = useState<AlertItem | null>(null);
 
-  const [alerts, setAlerts] = useState<AlertItem[]>([
+  const [threats, setThreats] = useState<ThreatItem[]>([
     {
-      id: 'alt-101',
-      title: 'Account Takeover & Anomaly Brute Force',
-      msg: '17 failed login attempts recorded followed by credential modification from untrusted proxy IP 198.51.100.42.',
+      id: 'TRT-1029',
+      name: 'SQL Injection Payload Attack',
       severity: 'CRITICAL',
-      category: 'Account Takeover',
-      mitreCode: 'T1110.001 (Credential Stuffing)',
-      time: '2 mins ago',
-      status: 'UNRESOLVED',
-      sourceIp: '198.51.100.42',
-      targetUser: 'analyst@cyberguard.demo',
-      evidenceData: { failedAttempts: 17, proxyLocation: 'Russia / Seychelle Proxy', recommendedAction: 'Revoke JWT session tokens & force WebAuthn MFA step-up.' }
+      type: 'Database Intrusion',
+      sourceIp: '185.220.101.5',
+      destination: '10.0.2.15 (DB-Server-01)',
+      detectionTime: '10:42 AM',
+      confidence: 99.4,
+      aiAnalysis: 'Malicious SQL command injection detected targeting authentication table via external query parameters.',
+      status: 'BLOCKED'
     },
     {
-      id: 'alt-102',
-      title: 'Suspicious ₹85,000 Transfer Intercepted',
-      msg: 'IMPS Direct wire transfer attempt intercepted due to 20x variance from baseline financial profile.',
-      severity: 'CRITICAL',
-      category: 'Transaction Fraud',
-      mitreCode: 'T1565.001 (Data Manipulation)',
-      time: '12 mins ago',
-      status: 'CONTAINED',
-      sourceIp: '103.28.45.12',
-      targetUser: 'UNKNOWN_CRYPTO_EXCHANGE',
-      evidenceData: { amount: 85000, baselineAvg: 4200, actionTaken: 'NPCI Settlement Freeze Executed' }
-    },
-    {
-      id: 'alt-103',
-      title: 'Phishing Domain Intercepted',
-      msg: 'Domain secure-bank-verify-login.com added to perimeter DNS sinkhole blocklist.',
+      id: 'TRT-1028',
+      name: 'Synthetic AI Voice Extortion',
       severity: 'HIGH',
-      category: 'Phishing',
-      mitreCode: 'T1566.002 (Spearphishing Link)',
-      time: '1 hour ago',
-      status: 'CONTAINED',
-      sourceIp: '185.220.101.4',
-      targetUser: 'Consumer Base',
-      evidenceData: { domain: 'secure-bank-verify-login.com', WHOISAge: '3 Days Old', SSL: "Let's Encrypt Free DV" }
+      type: 'Deepfake Fraud',
+      sourceIp: '45.142.120.9',
+      destination: 'Executive Mobile Endpoint',
+      detectionTime: '10:35 AM',
+      confidence: 96.2,
+      aiAnalysis: 'Audio spectral analysis flagged synthetic pitch variance matching neural voice cloning fingerprints.',
+      status: 'BLOCKED'
     },
     {
-      id: 'alt-104',
-      title: 'WhatsApp Screen Sharing Trojan APK Detected',
-      msg: 'Package Bank_KYC_Update.apk detected requesting BIND_ACCESSIBILITY_SERVICE remote access permissions.',
-      severity: 'CRITICAL',
-      category: 'Malware APK',
-      mitreCode: 'T1417 (Input Capture)',
-      time: '3 hours ago',
-      status: 'UNRESOLVED',
-      sourceIp: 'Device Storage',
-      targetUser: 'Android OS System',
-      evidenceData: { packageName: 'Bank_KYC_Update.apk', hash: 'a8f491b3c91e4f2d8f94', permissions: ['ACCESSIBILITY_SERVICE', 'SYSTEM_ALERT_WINDOW'] }
+      id: 'TRT-1027',
+      name: 'UPI Fraud Gateway Spoof',
+      severity: 'HIGH',
+      type: 'Financial Fraud',
+      sourceIp: '103.28.45.12',
+      destination: 'Consumer Payment Gateway',
+      detectionTime: '10:20 AM',
+      confidence: 94.8,
+      aiAnalysis: 'QR payload contains invalid NPCI VPA parameter headers directing to unverified offshore wallet.',
+      status: 'CONTAINED'
+    },
+    {
+      id: 'TRT-1026',
+      name: 'Credential Stuffing Anomaly',
+      severity: 'MEDIUM',
+      type: 'Account Takeover',
+      sourceIp: '198.51.100.42',
+      destination: 'User Auth Service',
+      detectionTime: '09:50 AM',
+      confidence: 88.0,
+      aiAnalysis: 'Automated rapid login attempts detected across 24 distinct user accounts from single IP range.',
+      status: 'BLOCKED'
+    },
+    {
+      id: 'TRT-1025',
+      name: 'Unusual External Port Scan',
+      severity: 'LOW',
+      type: 'Reconnaissance',
+      sourceIp: '89.248.165.74',
+      destination: 'Perimeter Firewall',
+      detectionTime: '09:12 AM',
+      confidence: 92.1,
+      aiAnalysis: 'Sequential port probing detected across TCP ports 80, 443, 8080, and 22.',
+      status: 'BLOCKED'
     }
   ]);
 
@@ -88,244 +94,139 @@ export const AlertsPage: React.FC = () => {
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
   };
 
-  // 1-Click Automated SOAR Containment Action
-  const handleContainAlert = (id: string, title: string) => {
-    playSuccessChime();
-    setAlerts(prev => prev.map(a => a.id === id ? { ...a, status: 'CONTAINED' } : a));
-    addToast('success', 'SOAR Playbook Executed', `Threat '${title}' contained & threat vectors neutralized.`);
+  const getSeverityBadge = (severity: string) => {
+    switch (severity) {
+      case 'CRITICAL':
+        return 'bg-[#FF3B3B]/20 text-[#FF3B3B] border-[#FF3B3B]/40';
+      case 'HIGH':
+        return 'bg-[#FF7A00]/20 text-[#FF7A00] border-[#FF7A00]/40';
+      case 'MEDIUM':
+        return 'bg-[#FACC15]/20 text-[#FACC15] border-[#FACC15]/40';
+      case 'LOW':
+        return 'bg-[#22C55E]/20 text-[#22C55E] border-[#22C55E]/40';
+      default:
+        return 'bg-[#10B981]/20 text-[#10B981] border-[#10B981]/40';
+    }
   };
 
-  // Bulk Contain Unresolved Alerts
-  const handleBulkContain = () => {
-    playSuccessChime();
-    setAlerts(prev => prev.map(a => ({ ...a, status: 'CONTAINED' })));
-    addToast('success', 'Bulk SOAR Execution Complete', 'All active security alerts marked as CONTAINED.');
-  };
-
-  // Delete Alert
-  const handleDeleteAlert = (id: string) => {
-    setAlerts(prev => prev.filter(a => a.id !== id));
-    if (selectedAlert?.id === id) setSelectedAlert(null);
-    addToast('warning', 'Alert Removed', 'Alert record removed from operational triage console.');
-  };
-
-  // Filtered Alerts
-  const filteredAlerts = alerts.filter(a => {
-    const matchesSearch = a.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          a.msg.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          a.category.toLowerCase().includes(searchQuery.toLowerCase());
-    if (!matchesSearch) return false;
-
-    if (filterSeverity !== 'ALL' && a.severity !== filterSeverity) return false;
-    if (filterStatus !== 'ALL' && a.status !== filterStatus) return false;
-    return true;
+  const filteredThreats = threats.filter(t => {
+    const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          t.sourceIp.includes(searchQuery) ||
+                          t.type.toLowerCase().includes(searchQuery.toLowerCase());
+    if (filterSeverity !== 'ALL' && t.severity !== filterSeverity) return false;
+    return matchesSearch;
   });
 
-  const unresolvedCount = alerts.filter(a => a.status === 'UNRESOLVED').length;
-
   return (
-    <div className="p-6 md:p-8 space-y-8 max-w-6xl mx-auto relative">
+    <div className="p-6 md:p-8 space-y-6 max-w-[1600px] mx-auto font-sans text-[#F8FAFC]">
       <ToastContainer toasts={toasts} onClose={(id) => setToasts(prev => prev.filter(t => t.id !== id))} />
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/60 pb-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-400 font-mono text-[11px] font-bold border border-red-500/30 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> REAL-TIME SOC ALERT STREAM
-            </span>
-          </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-white mt-1 flex items-center gap-3">
-            <Bell className="w-8 h-8 text-cyan-400" />
-            ENTERPRISE SOC ALERT TRIAGE CONSOLE
+          <h1 className="text-2xl font-extrabold text-[#F8FAFC] tracking-wide flex items-center gap-2.5">
+            <ShieldAlert className="w-7 h-7 text-[#00E5FF]" />
+            Threat Detection & Analytics
           </h1>
-          <p className="text-sm text-slate-400 mt-1">Real-time threat alert streaming, 1-click SOAR automated containment, and MITRE ATT&CK forensic inspection.</p>
+          <p className="text-xs text-[#94A3B8] mt-1">Real-time threat feed, confidence scores, and automated containment logs</p>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
-          <button
-            onClick={handleBulkContain}
-            className="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-400 text-slate-950 font-extrabold text-xs shadow-cyber-glow hover:scale-105 transition-all flex items-center gap-2"
-          >
-            <CheckCheck className="w-4 h-4" />
-            <span>Bulk Contain All ({unresolvedCount} Active)</span>
-          </button>
-        </div>
+        <button
+          onClick={() => {
+            addToast('success', 'Bulk Containment Executed', 'All pending threat vectors neutralized.');
+          }}
+          className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#3B82F6] text-[#070B14] font-extrabold text-xs shadow-[0_0_15px_rgba(0,229,255,0.25)] hover:scale-105 transition-all flex items-center gap-2 self-start sm:self-auto cursor-pointer"
+        >
+          <CheckCheck className="w-4 h-4" />
+          <span>Execute Auto-Containment</span>
+        </button>
       </div>
 
-      {/* Filter & Search Toolbar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#0F1420] border border-[#232D42] p-4 rounded-2xl font-mono text-xs">
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Search className="w-4 h-4 text-slate-500" />
+      {/* Search and Filters */}
+      <div className="cg-card p-4 flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
+        <div className="flex items-center gap-2 bg-[#151F32] border border-slate-800 rounded-xl px-3.5 py-2 w-full md:w-96">
+          <Search className="w-4 h-4 text-[#64748B]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search Alerts, MITRE Code, or Category..."
-            className="bg-transparent text-white focus:outline-none w-full sm:w-64"
+            placeholder="Search by threat name, IP, or type..."
+            className="bg-transparent text-[#F8FAFC] focus:outline-none w-full placeholder-[#64748B]"
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-slate-400 uppercase">Severity:</span>
-          {(['ALL', 'CRITICAL', 'HIGH', 'MEDIUM'] as const).map(s => (
+        <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto">
+          <span className="text-[#94A3B8] font-medium">Severity:</span>
+          {['ALL', 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].map((sev) => (
             <button
-              key={s}
-              onClick={() => setFilterSeverity(s)}
-              className={`px-3 py-1 rounded-lg transition-all ${
-                filterSeverity === s ? 'bg-cyan-500 text-slate-950 font-bold' : 'bg-[#161D2F] text-slate-400 border border-[#232D42]'
+              key={sev}
+              onClick={() => setFilterSeverity(sev)}
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
+                filterSeverity === sev 
+                  ? 'bg-[#00E5FF] text-[#070B14] shadow-[0_0_10px_rgba(0,229,255,0.3)]' 
+                  : 'bg-[#151F32] text-[#94A3B8] hover:text-[#F8FAFC] border border-slate-800'
               }`}
             >
-              {s}
-            </button>
-          ))}
-
-          <span className="text-slate-400 uppercase ml-2">Status:</span>
-          {(['ALL', 'UNRESOLVED', 'CONTAINED'] as const).map(st => (
-            <button
-              key={st}
-              onClick={() => setFilterStatus(st)}
-              className={`px-3 py-1 rounded-lg transition-all ${
-                filterStatus === st ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-[#161D2F] text-slate-400 border border-[#232D42]'
-              }`}
-            >
-              {st}
+              {sev}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Alerts Stream Feed */}
-      <div className="space-y-4">
-        {filteredAlerts.map(alert => (
-          <div 
-            key={alert.id} 
-            className={`p-6 rounded-3xl border transition-all shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${
-              alert.severity === 'CRITICAL' && alert.status === 'UNRESOLVED'
-                ? 'bg-red-500/10 border-red-500/40 text-red-200'
-                : alert.status === 'CONTAINED'
-                ? 'bg-[#0F1420] border-emerald-500/30 text-emerald-200'
-                : 'bg-[#0F1420] border-[#232D42] text-slate-300'
-            }`}
-          >
-            <div className="flex items-start gap-4 flex-1">
-              <div className={`p-3.5 rounded-2xl shrink-0 ${
-                alert.severity === 'CRITICAL' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'
-              }`}>
-                <ShieldAlert className="w-6 h-6 animate-pulse" />
-              </div>
-
-              <div className="space-y-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-base font-bold text-white font-sans">{alert.title}</h3>
-                  <span className="px-2 py-0.5 rounded bg-[#161D2F] border border-[#232D42] text-[10px] font-mono text-cyan-400 font-bold">
-                    {alert.mitreCode}
-                  </span>
-                  <span className="text-[10px] font-mono text-slate-400">• {alert.time}</span>
-                </div>
-                <p className="text-xs text-slate-300 leading-relaxed font-sans">{alert.msg}</p>
-                <div className="flex items-center gap-4 text-[11px] font-mono text-slate-400 pt-1">
-                  <span>Source: <strong className="text-white">{alert.sourceIp || 'Internal System'}</strong></span>
-                  <span>Category: <strong className="text-cyan-400">{alert.category}</strong></span>
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons Right Side */}
-            <div className="flex items-center gap-2 shrink-0 self-end md:self-center font-mono text-xs">
-              <button
-                onClick={() => setSelectedAlert(alert)}
-                className="px-3 py-2 rounded-xl bg-sky-500/10 text-cyan-400 border border-sky-500/30 hover:bg-sky-500 hover:text-slate-950 font-bold transition-all flex items-center gap-1.5"
-              >
-                <FileText className="w-3.5 h-3.5" />
-                <span>Forensics</span>
-              </button>
-
-              {alert.status === 'UNRESOLVED' ? (
-                <button
-                  onClick={() => handleContainAlert(alert.id, alert.title)}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-white font-extrabold text-xs shadow-red-glow hover:scale-105 transition-all flex items-center gap-1.5"
-                >
-                  <Zap className="w-3.5 h-3.5" />
-                  <span>Execute SOAR Containment</span>
-                </button>
-              ) : (
-                <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30 flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> CONTAINED
-                </span>
-              )}
-
-              <button
-                onClick={() => handleDeleteAlert(alert.id)}
-                className="p-2 rounded-xl bg-[#161D2F] text-slate-400 hover:text-red-400 border border-[#232D42]"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* ALERT FORENSICS & MITRE ATT&CK DRAWER */}
-      {selectedAlert && (
-        <div className="fixed inset-y-0 right-0 w-full max-w-lg bg-[#0F1420] border-l border-[#232D42] p-6 shadow-2xl z-50 flex flex-col justify-between overflow-y-auto font-mono text-xs animate-in slide-in-from-right">
-          <div className="space-y-6">
-            <div className="flex items-center justify-between border-b border-[#232D42] pb-4">
-              <div>
-                <span className="text-cyan-400 font-bold text-xs">{selectedAlert.id}</span>
-                <h3 className="text-lg font-bold text-white font-sans">{selectedAlert.title}</h3>
-              </div>
-              <button onClick={() => setSelectedAlert(null)} className="p-1 rounded-lg text-slate-400 hover:text-white">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-[#161D2F] space-y-2 border border-[#232D42]">
-              <div className="flex items-center justify-between">
-                <span className="text-slate-400">MITRE ATT&CK Classification:</span>
-                <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400 font-bold">{selectedAlert.mitreCode}</span>
-              </div>
-              <p className="text-slate-300">{selectedAlert.msg}</p>
-            </div>
-
-            {/* Evidence Payload Data */}
-            <div className="space-y-2">
-              <h4 className="text-slate-300 font-bold uppercase font-sans text-xs">Raw Evidence Payload Telemetry:</h4>
-              <pre className="p-4 rounded-2xl bg-[#161D2F] border border-[#232D42] text-slate-300 overflow-x-auto text-[11px] font-mono leading-relaxed">
-                {JSON.stringify(selectedAlert.evidenceData, null, 2)}
-              </pre>
-            </div>
-
-            {/* SOAR Containment Playbook Action */}
-            <div className="p-4 rounded-2xl bg-sky-500/10 border border-sky-500/30 space-y-2">
-              <h4 className="font-bold text-cyan-400 font-sans flex items-center gap-1.5">
-                <Zap className="w-4 h-4" /> Recommended SOAR Automated Playbook:
-              </h4>
-              <p className="text-slate-300">Inject IP {selectedAlert.sourceIp} into perimeter DNS sinkhole & revoke active JWT sessions.</p>
-            </div>
-          </div>
-
-          <div className="flex gap-3 pt-4">
-            {selectedAlert.status === 'UNRESOLVED' && (
-              <button
-                onClick={() => {
-                  handleContainAlert(selectedAlert.id, selectedAlert.title);
-                  setSelectedAlert(null);
-                }}
-                className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-red-500 to-orange-500 text-white font-extrabold shadow-red-glow hover:scale-105 transition-all"
-              >
-                Execute Containment Playbook
-              </button>
-            )}
-            <button
-              onClick={() => setSelectedAlert(null)}
-              className="flex-1 py-3 rounded-2xl bg-[#161D2F] border border-[#232D42] text-white font-bold"
-            >
-              Close Drawer
-            </button>
-          </div>
+      {/* Threat List Table */}
+      <div className="cg-card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-[#151F32] text-[#94A3B8] font-semibold border-b border-slate-800">
+              <tr>
+                <th className="p-4">Threat Name & ID</th>
+                <th className="p-4">Severity</th>
+                <th className="p-4">Type</th>
+                <th className="p-4">Source IP</th>
+                <th className="p-4">Destination</th>
+                <th className="p-4">Detection Time</th>
+                <th className="p-4">AI Confidence</th>
+                <th className="p-4">Status</th>
+                <th className="p-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800/60">
+              {filteredThreats.map((threat) => (
+                <tr key={threat.id} className="hover:bg-[#151F32]/50 transition-colors">
+                  <td className="p-4 font-bold text-[#F8FAFC]">
+                    <div>{threat.name}</div>
+                    <span className="text-[10px] text-[#00E5FF] font-mono">{threat.id}</span>
+                  </td>
+                  <td className="p-4">
+                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${getSeverityBadge(threat.severity)}`}>
+                      {threat.severity}
+                    </span>
+                  </td>
+                  <td className="p-4 text-[#94A3B8]">{threat.type}</td>
+                  <td className="p-4 font-mono text-[#F8FAFC]">{threat.sourceIp}</td>
+                  <td className="p-4 text-[#94A3B8]">{threat.destination}</td>
+                  <td className="p-4 text-[#64748B]">{threat.detectionTime}</td>
+                  <td className="p-4 font-bold text-[#00E5FF]">{threat.confidence}%</td>
+                  <td className="p-4">
+                    <span className="px-2 py-0.5 rounded bg-[#10B981]/10 text-[#10B981] font-bold text-[10px] border border-[#10B981]/30">
+                      {threat.status}
+                    </span>
+                  </td>
+                  <td className="p-4 text-right">
+                    <button
+                      onClick={() => navigate(`/incidents/${threat.id}`)}
+                      className="px-3 py-1.5 rounded-lg bg-[#151F32] border border-slate-800 text-[#00E5FF] hover:bg-[#00E5FF]/10 font-medium text-xs transition-colors flex items-center gap-1 ml-auto"
+                    >
+                      <span>Investigate</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
     </div>
   );
 };

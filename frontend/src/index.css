@@ -3,55 +3,562 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    background-color: #040711;
+  }
+
   body {
-    background-color: #080B11;
+    background-color: transparent;
     color: #F8FAFC;
+    transition: background-color 150ms ease-in-out, color 150ms ease-in-out;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  body.light-mode {
+    background-color: #F8FAFC !important;
+    color: #0F172A !important;
   }
 }
 
-/* Custom Cyber Glow & Glassmorphism Utilities */
-.cyber-glass {
-  background: rgba(15, 20, 32, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
+/* ------------------------------------------------------------------------- */
+/* GAMING HUD & CYBERPUNK SCI-FI EFFECTS */
+/* ------------------------------------------------------------------------- */
 
-.cyber-glass-glow {
-  background: rgba(22, 29, 47, 0.85);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  box-shadow: 0 0 30px rgba(56, 189, 248, 0.1);
-}
-
-.scanline {
-  position: relative;
-  overflow: hidden;
-}
-.scanline::before {
-  content: " ";
-  display: block;
-  position: absolute;
-  top: 0; left: 0; bottom: 0; right: 0;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-  z-index: 2;
-  background-size: 100% 2px, 3px 100%;
+/* Gaming CRT Scanline Overlay */
+.gaming-crt-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
   pointer-events: none;
-  opacity: 0.4;
+  z-index: 999;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.25) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.03),
+    rgba(0, 255, 0, 0.01),
+    rgba(0, 0, 255, 0.03)
+  );
+  background-size: 100% 3px, 6px 100%;
+  opacity: 0.55;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* Neon Text Glow Utilities */
+.neon-text-cyan {
+  color: #00E5FF;
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.7), 0 0 20px rgba(0, 229, 255, 0.4);
 }
-::-webkit-scrollbar-track {
-  background: #080B11;
+
+.neon-text-magenta {
+  color: #FF007F;
+  text-shadow: 0 0 10px rgba(255, 0, 127, 0.7), 0 0 20px rgba(255, 0, 127, 0.4);
 }
-::-webkit-scrollbar-thumb {
-  background: #232D42;
-  border-radius: 4px;
+
+.neon-text-amber {
+  color: #FBBF24;
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.7), 0 0 20px rgba(251, 191, 36, 0.4);
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #38BDF8;
+
+/* Gaming HUD Card Borders */
+.gaming-hud-card {
+  position: relative;
+  background: #0B1220;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 1.25rem;
+  box-shadow: 0 0 25px rgba(0, 229, 255, 0.12);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+.gaming-hud-card:hover {
+  border-color: #00E5FF;
+  box-shadow: 0 0 35px rgba(0, 229, 255, 0.3);
+  transform: translateY(-3px);
+}
+
+/* Custom Cyber Guard UI Components */
+.cg-card {
+  background-color: #101827;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0.875rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.cg-card-elevated {
+  background-color: #151F32;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 0.875rem;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+
+.cg-card:hover {
+  border-color: rgba(0, 229, 255, 0.45);
+  box-shadow: 0 0 25px rgba(0, 229, 255, 0.25);
+}
+
+/* Glow Effects */
+.glow-cyan {
+  box-shadow: 0 0 25px rgba(0, 229, 255, 0.35);
+}
+
+.glow-violet {
+  box-shadow: 0 0 25px rgba(124, 58, 237, 0.35);
+}
+
+.glow-critical {
+  box-shadow: 0 0 25px rgba(255, 59, 59, 0.4);
+}
+
+/* Sci-Fi HUD Support */
+.nexus-card {
+  position: relative;
+  background: #101827;
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  border-radius: 1rem;
+  box-shadow: 0 0 25px rgba(0, 229, 255, 0.2);
+}
+
+.nexus-card-purple {
+  position: relative;
+  background: #101827;
+  border: 1px solid rgba(124, 58, 237, 0.4);
+  border-radius: 1rem;
+  box-shadow: 0 0 25px rgba(124, 58, 237, 0.2);
+}
+
+.nexus-card::before {
+  content: "";
+  position: absolute;
+  top: -1px; left: 16px;
+  width: 32px; height: 3px;
+  background: #00E5FF;
+  box-shadow: 0 0 10px #00E5FF;
+}
+
+.nexus-card-purple::before {
+  content: "";
+  position: absolute;
+  top: -1px; left: 16px;
+  width: 32px; height: 3px;
+  background: #7C3AED;
+  box-shadow: 0 0 10px #7C3AED;
+}
+
+/* ------------------------------------------------------------------------- */
+/* REAL-TIME LIVE KEYFRAME ANIMATIONS */
+/* ------------------------------------------------------------------------- */
+
+/* 1. Sci-Fi Radial Ring Spin Animation */
+@keyframes ring-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.hud-ring-spin {
+  animation: ring-spin 18s linear infinite;
+}
+
+.hud-ring-spin-reverse {
+  animation: ring-spin 12s linear infinite reverse;
+}
+
+/* 2. Equalizer Bar Pulse */
+@keyframes eq-bar {
+  0%, 100% { height: 20%; }
+  50% { height: 95%; }
+}
+
+.animate-eq-1 { animation: eq-bar 0.9s ease-in-out infinite; }
+.animate-eq-2 { animation: eq-bar 1.3s ease-in-out infinite 0.2s; }
+.animate-eq-3 { animation: eq-bar 1.1s ease-in-out infinite 0.4s; }
+
+/* 3. Gaming Cyber Pulse Glow */
+@keyframes gaming-pulse {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.03); }
+}
+
+.animate-gaming-pulse {
+  animation: gaming-pulse 3s ease-in-out infinite;
+}
+
+/* ------------------------------------------------------------------------- */
+/* 4. ANIMATED CYBER GLITCH HOVER & GAMING ENTRY ANIMATIONS */
+/* ------------------------------------------------------------------------- */
+
+@keyframes cyber-glitch-skew {
+  0% { transform: skew(0deg); }
+  20% { transform: skew(-2deg) scale(1.01); filter: drop-shadow(2px 0 0 #00E5FF) drop-shadow(-2px 0 0 #FF007F); }
+  40% { transform: skew(2deg) scale(1.02); filter: drop-shadow(-2px 0 0 #00E5FF) drop-shadow(2px 0 0 #FF007F); }
+  60% { transform: skew(-1deg); }
+  80% { transform: skew(1deg); }
+  100% { transform: skew(0deg); filter: none; }
+}
+
+/* ------------------------------------------------------------------------- */
+/* ASSASSIN'S CREED ANIMUS MEMORY SYNCHRONIZATION ENTRY ANIMATION (ELECTRIC BLUE THEME) */
+/* ------------------------------------------------------------------------- */
+@keyframes animus-memory-sync-entry {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(28px) rotateX(6deg);
+    filter: blur(16px) brightness(1.9) drop-shadow(0 0 35px rgba(0, 240, 255, 0.9)) drop-shadow(0 0 50px rgba(59, 130, 246, 0.6));
+    clip-path: polygon(5% 0%, 95% 0%, 100% 95%, 0% 100%);
+  }
+  45% {
+    opacity: 0.85;
+    transform: scale(1.01) translateY(-4px) rotateX(-1deg);
+    filter: blur(4px) brightness(1.3) drop-shadow(0 0 30px rgba(0, 240, 255, 0.9));
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0) rotateX(0deg);
+    filter: none;
+    clip-path: none;
+  }
+}
+
+@keyframes cyber-flash-pulse {
+  0% { box-shadow: 0 0 0 rgba(0, 240, 255, 0); }
+  50% { box-shadow: 0 0 35px rgba(0, 240, 255, 0.9), 0 0 60px rgba(59, 130, 246, 0.7); }
+  100% { box-shadow: 0 0 20px rgba(0, 240, 255, 0.4); }
+}
+
+/* Global Animus Glitch & Electric Blue Hover Utilities */
+button:hover, a:hover, .cyber-glitch-trigger:hover {
+  animation: cyber-glitch-skew 0.35s ease-in-out forwards;
+  filter: drop-shadow(0 0 14px rgba(0, 240, 255, 0.8));
+}
+
+.cg-card:hover, .gaming-hud-card:hover, .nexus-card:hover {
+  animation: cyber-flash-pulse 0.4s ease-out forwards;
+  border-color: #00F0FF !important;
+}
+
+/* Assassin's Creed Animus Entry Animation */
+.cyber-entry-animate, .animus-entry-animate {
+  animation: animus-memory-sync-entry 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  perspective: 1200px;
+  transform-style: preserve-3d;
+}
+
+/* ------------------------------------------------------------------------- */
+/* 5. RUSH HOUR 24 CYBER SUMMIT DESIGN SYSTEM STYLES */
+/* ------------------------------------------------------------------------- */
+
+.font-orbitron {
+  font-family: 'Orbitron', system-ui, -apple-system, sans-serif;
+}
+
+/* Glassmorphism Card - Assassin's Creed Animus Theme */
+.glass-card {
+  background: rgba(7, 11, 20, 0.85) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(245, 158, 11, 0.45) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), 0 0 20px rgba(245, 158, 11, 0.15) !important;
+  border-radius: 1.25rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.glass-card:hover {
+  border-color: #F59E0B !important;
+  box-shadow: 0 0 35px rgba(245, 158, 11, 0.5), 0 0 50px rgba(0, 240, 255, 0.3) !important;
+  transform: translateY(-4px);
+}
+
+/* Section Pill Badge */
+.section-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 1rem;
+  border-radius: 9999px;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  color: #C084FC;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.25);
+}
+
+.badge-glow-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: #00F0FF;
+  box-shadow: 0 0 10px #00F0FF;
+  animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Cyber Box Decor Accents */
+.cyber-box-decor {
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 16px; height: 16px;
+  border-bottom: 2px solid #00F0FF;
+  border-right: 2px solid #00F0FF;
+}
+
+/* Background Cyber Mesh Grid */
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(168, 85, 247, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(168, 85, 247, 0.07) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 100%);
+  pointer-events: none;
+}
+
+/* Rush Hour Countdown Widget */
+.rh27-countdown {
+  background: rgba(11, 18, 32, 0.85);
+  border: 1px solid rgba(168, 85, 247, 0.5);
+  border-radius: 1.5rem;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 0 30px rgba(168, 85, 247, 0.3);
+  text-align: center;
+  max-width: 520px;
+  margin: 1.5rem auto 0;
+}
+
+.rh27-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #00F0FF;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.75rem;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+}
+
+.rh27-timer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.rh27-unit {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  border-radius: 0.875rem;
+  padding: 0.75rem 1rem;
+  min-width: 72px;
+  box-shadow: inset 0 0 15px rgba(168, 85, 247, 0.2);
+}
+
+.rh27-value {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 900;
+  color: #F8FAFC;
+  line-height: 1;
+}
+
+.rh27-unit-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #C084FC;
+  margin-top: 0.35rem;
+  letter-spacing: 0.05em;
+}
+
+.rh27-sep {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #00F0FF;
+  animation: pulse 1.5s infinite;
+}
+
+.cd-pulse {
+  animation: timer-pulse 0.4s ease-out;
+}
+
+@keyframes timer-pulse {
+  0% { transform: scale(1.15); color: #00F0FF; }
+  100% { transform: scale(1); }
+}
+
+/* 3D Flip Card Container */
+.domain-card-perspective {
+  perspective: 1000px;
+}
+
+.domain-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.domain-card-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.domain-card-front, .domain-card-back {
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.domain-card-back {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg);
+}
+
+/* ------------------------------------------------------------------------- */
+/* ASSASSIN'S CREED ANIMUS ANIMATIC THEME DESIGN SYSTEM */
+/* ------------------------------------------------------------------------- */
+
+/* Chamfered Animus Polygon Clip Path */
+.animus-clip-corner {
+  clip-path: polygon(
+    10px 0, 
+    calc(100% - 10px) 0, 
+    100% 10px, 
+    100% calc(100% - 10px), 
+    calc(100% - 10px) 100%, 
+    10px 100%, 
+    0 calc(100% - 10px), 
+    0 10px
+  );
+}
+
+.animus-button-clip {
+  clip-path: polygon(
+    8px 0, 
+    100% 0, 
+    100% calc(100% - 8px), 
+    calc(100% - 8px) 100%, 
+    0 100%, 
+    0 8px
+  );
+}
+
+/* Animus Golden Eagle Vision Glows */
+.glow-animus-gold {
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.4), 0 0 40px rgba(217, 119, 6, 0.2);
+}
+
+.glow-animus-cyan {
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.4), 0 0 40px rgba(6, 182, 212, 0.2);
+}
+
+/* Animus Scanline Pulse Beam */
+@keyframes animus-scan-beam {
+  0% { top: -10%; opacity: 0; }
+  50% { opacity: 0.8; }
+  100% { top: 110%; opacity: 0; }
+}
+
+.animus-scanline {
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #F59E0B, #00F0FF, transparent);
+  box-shadow: 0 0 10px #F59E0B, 0 0 15px #00F0FF;
+  animation: animus-scan-beam 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Animus Eagle Vision Pulse Ring */
+@keyframes eagle-vision-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.6); }
+  70% { box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+.animus-eagle-pulse {
+  animation: eagle-vision-pulse 2.5s infinite;
+}
+
+/* Animus Animatic Card */
+.animus-card {
+  position: relative;
+  background: rgba(7, 11, 20, 0.85) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 0 2px rgba(245, 158, 11, 0.2);
+  border-radius: 1rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animus-card:hover {
+  border-color: #F59E0B !important;
+  box-shadow: 0 0 30px rgba(245, 158, 11, 0.4), 0 0 50px rgba(0, 240, 255, 0.25) !important;
+  transform: translateY(-3px);
+}
+
+/* Animus Animatic Button */
+.animus-btn {
+  position: relative;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.3) 100%) !important;
+  border: 1px solid #F59E0B !important;
+  color: #FFFFFF !important;
+  font-family: 'Orbitron', sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.animus-btn:hover {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%) !important;
+  color: #000000 !important;
+  box-shadow: 0 0 25px rgba(245, 158, 11, 0.8), 0 0 35px rgba(0, 240, 255, 0.5) !important;
+  transform: scale(1.03);
+}
+
+.animus-btn-cyan {
+  position: relative;
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.2) 0%, rgba(6, 182, 212, 0.3) 100%) !important;
+  border: 1px solid #00F0FF !important;
+  color: #FFFFFF !important;
+  font-family: 'Orbitron', sans-serif !important;
+  font-weight: 800 !important;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.animus-btn-cyan:hover {
+  background: linear-gradient(135deg, #00F0FF 0%, #06B6D4 100%) !important;
+  color: #000000 !important;
+  box-shadow: 0 0 25px rgba(0, 240, 255, 0.8) !important;
+  transform: scale(1.03);
+}
+
+/* Animus Corner Bracket Accents */
+.animus-box-decor {
+  position: absolute;
+  top: 0; left: 0;
+  width: 12px; height: 12px;
+  border-top: 2px solid #F59E0B;
+  border-left: 2px solid #F59E0B;
+}
+
+.animus-box-decor-br {
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 12px; height: 12px;
+  border-bottom: 2px solid #F59E0B;
+  border-right: 2px solid #F59E0B;
+}
+

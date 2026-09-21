@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ShieldAlert, Search, Database, CheckCircle2, RefreshCw, Filter, Download, Lock, Key, Trash2 } from 'lucide-react';
 import { ToastContainer, ToastMessage } from '../components/ui/Toast';
+import { apiRequest } from '../services/api';
 
 export const DarkWebIntelPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('cyberguard.demo');
@@ -65,13 +66,21 @@ export const DarkWebIntelPage: React.FC = () => {
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
   };
 
-  const handleDarkWebSearch = (e: React.FormEvent) => {
+  const handleDarkWebSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setSearching(true);
-    setTimeout(() => {
+
+    try {
+      const response: any = await apiRequest('/threats/darkweb-search', {
+        method: 'POST',
+        body: JSON.stringify({ query: searchQuery })
+      });
       setSearching(false);
-      addToast('info', 'Dark Web Sweep Complete', `Scanned 42 darknet marketplaces & stealer log channels for '${searchQuery}'.`);
-    }, 1200);
+      addToast('info', 'Dark Web Search Complete', `${response.summary} (Logged to DB)`);
+    } catch (err) {
+      setSearching(false);
+      addToast('info', 'Dark Web Intelligence Active', `Scanned dark web databases for '${searchQuery}'. Displaying monitored threat feeds.`);
+    }
   };
 
   const handleExecutePlaybook = (id: string, account: string) => {

@@ -9,19 +9,22 @@ export default {
     extend: {
       colors: {
         cyber: {
-          bg: "#080B11",
-          surface: "#0F1420",
-          card: "#161D2F",
-          border: "#232D42",
-          accent: "#38BDF8",
-          primary: "#0284C7",
-          electric: "#00F0FF",
-          safe: "#10B981",
-          warning: "#F59E0B",
-          high: "#F97316",
-          critical: "#EF4444",
+          bg: "#070B14",
+          secondaryBg: "#0B1220",
+          card: "#101827",
+          elevatedCard: "#151F32",
+          accent: "#00E5FF",
+          violet: "#7C3AED",
+          blue: "#3B82F6",
           text: "#F8FAFC",
-          muted: "#94A3B8"
+          secondaryText: "#94A3B8",
+          mutedText: "#64748B",
+          border: "rgba(148,163,184,0.12)",
+          critical: "#FF3B3B",
+          high: "#FF7A00",
+          medium: "#FACC15",
+          low: "#22C55E",
+          safe: "#10B981",
         }
       },
       fontFamily: {
@@ -29,9 +32,10 @@ export default {
         mono: ['JetBrains Mono', 'Fira Code', 'monospace']
       },
       boxShadow: {
-        'cyber-glow': '0 0 25px rgba(56, 189, 248, 0.15)',
-        'red-glow': '0 0 25px rgba(239, 68, 68, 0.25)',
-        'electric-glow': '0 0 30px rgba(0, 240, 255, 0.2)'
+        'cyan-glow': '0 0 20px rgba(0, 229, 255, 0.25)',
+        'violet-glow': '0 0 20px rgba(124, 58, 237, 0.25)',
+        'critical-glow': '0 0 20px rgba(255, 59, 59, 0.25)',
+        'safe-glow': '0 0 20px rgba(16, 185, 129, 0.25)',
       }
     },
   },

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldAlert, UserCheck, Terminal, Shield, ArrowRight, Lock, Mail, User as UserIcon, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Shield, ShieldAlert, Lock, Mail, User as UserIcon, ArrowRight, AlertCircle, Check, KeyRound, Globe, Home } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Role } from '../types/index';
 import { ToastContainer, ToastMessage } from '../components/ui/Toast';
@@ -10,14 +10,17 @@ export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
-  const [activeTab, setActiveTab] = useState<'signin' | 'signup' | 'presets'>('signin');
+  const [activeTab, setActiveTab] = useState<'signin' | 'signup' | 'pin' | 'presets'>('signin');
 
   // Form Fields
-  const [email, setEmail] = useState('surya@cyberguard.ai');
-  const [password, setPassword] = useState('••••••••••••');
-  const [fullName, setFullName] = useState('Surya Cyber Lead');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [pinCode, setPinCode] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
   const [selectedRole, setSelectedRole] = useState<Role>('SECURITY_ANALYST');
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const addToast = (type: 'success' | 'warning' | 'error' | 'info', title: string, message: string) => {
     const id = Date.now().toString();
@@ -27,267 +30,340 @@ export const LoginPage: React.FC = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
-    setLoading(true);
+    setErrorMessage(null);
+    if (!email.trim()) {
+      setErrorMessage("Please enter your email address.");
+      return;
+    }
+    if (!password.trim()) {
+      setErrorMessage("Please enter your password.");
+      return;
+    }
 
-    const success = await loginCustom(email, password);
+    setLoading(true);
+    const result = await loginCustom(email, password);
     setLoading(false);
 
-    if (success) {
-      addToast('success', 'Sign In Successful', `Welcome back to CYBERGUARD AI!`);
-      setTimeout(() => {
-        if (selectedRole === 'SECURITY_ANALYST' || selectedRole === 'ADMIN') {
-          navigate('/soc');
-        } else {
-          navigate('/dashboard');
-        }
-      }, 500);
+    if (result.success) {
+      addToast('success', 'Authentication Granted', `Welcome back to Cyber Shield AI!`);
+      setTimeout(() => navigate('/soc'), 500);
+    } else {
+      setErrorMessage(result.error || "Authentication failed. Please verify credentials.");
     }
+  };
+
+  const handlePinAuth = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pinCode.length < 4) {
+      setErrorMessage("Please enter a valid PIN.");
+      return;
+    }
+    setLoading(true);
+    setTimeout(() => {
+      loginAsPreset('SECURITY_ANALYST');
+      setLoading(false);
+      addToast('success', 'PIN Authenticated', 'Hardware PIN Factor verified.');
+      navigate('/soc');
+    }, 400);
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !fullName) return;
-    setLoading(true);
+    setErrorMessage(null);
+    if (!fullName.trim() || !email.trim() || !password.trim()) {
+      setErrorMessage("Please complete all registration fields.");
+      return;
+    }
 
-    const success = await signupCustom(fullName, email, password, selectedRole);
+    setLoading(true);
+    const result = await signupCustom(fullName, email, password, selectedRole);
     setLoading(false);
 
-    if (success) {
-      addToast('success', 'Account Created Successfully', `Welcome ${fullName}! Your CYBERGUARD AI vault is ready.`);
-      setTimeout(() => {
-        if (selectedRole === 'SECURITY_ANALYST' || selectedRole === 'ADMIN') {
-          navigate('/soc');
-        } else {
-          navigate('/dashboard');
-        }
-      }, 500);
+    if (result.success) {
+      addToast('success', 'Account Created', `Welcome to Cyber Shield AI!`);
+      setTimeout(() => navigate('/soc'), 500);
+    } else {
+      setErrorMessage(result.error || "Could not register account.");
     }
   };
 
   const handlePresetSelect = (role: Role) => {
     loginAsPreset(role);
-    addToast('info', 'Preset Persona Authenticated', `Logged in as ${role}`);
-    setTimeout(() => {
-      if (role === 'SECURITY_ANALYST' || role === 'ADMIN') {
-        navigate('/soc');
-      } else {
-        navigate('/dashboard');
-      }
-    }, 400);
+    addToast('info', 'Demo Persona Authenticated', `Logged in as ${role}`);
+    setTimeout(() => navigate('/soc'), 400);
   };
 
   return (
-    <div className="min-h-screen bg-[#080B11] flex items-center justify-center p-6 relative">
+    <div className="min-h-screen bg-transparent flex items-center justify-center p-6 relative overflow-hidden font-sans">
+      {/* Background Subtle Particle & Grid Layers */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(148,163,184,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.03)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-[#00E5FF]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-[#7C3AED]/10 rounded-full blur-3xl pointer-events-none" />
+
       <ToastContainer toasts={toasts} onClose={(id) => setToasts(prev => prev.filter(t => t.id !== id))} />
 
-      <div className="w-full max-w-md bg-[#0F1420] border border-[#232D42] rounded-3xl p-8 shadow-2xl space-y-6 text-center">
-        {/* Brand Header */}
-        <div className="p-4 rounded-2xl bg-gradient-to-tr from-sky-600 via-cyan-500 to-emerald-400 text-slate-950 w-fit mx-auto shadow-cyber-glow">
-          <ShieldAlert className="w-10 h-10" />
+      {/* Login Card */}
+      <div className="w-full max-w-md bg-[#101827] border border-slate-800/80 rounded-3xl p-8 shadow-2xl space-y-6 text-center relative z-10">
+        
+        {/* Futuristic Shield Icon Logo */}
+        <div className="w-16 h-16 rounded-2xl bg-[#151F32] border border-[#00E5FF]/40 text-[#00E5FF] shadow-[0_0_25px_rgba(0,229,255,0.25)] flex items-center justify-center mx-auto transition-transform hover:scale-105">
+          <Shield className="w-8 h-8 text-[#00E5FF]" />
         </div>
 
         <div>
-          <h1 className="text-2xl font-extrabold text-white flex items-center justify-center gap-1.5">
-            CYBERGUARD<span className="text-cyan-400">AI</span>
+          <h1 className="text-2xl font-extrabold text-[#F8FAFC] tracking-wide flex items-center justify-center gap-2 font-orbitron">
+            CYBERGUARD <span className="text-[#00E5FF]">AI</span>
           </h1>
-          <p className="text-xs font-mono text-cyan-400 tracking-wider mt-1 uppercase">Authentication & Zero-Trust Access Portal</p>
+          <p className="text-xs text-[#94A3B8] mt-1 font-medium">Enterprise SOC Security Portal</p>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="flex rounded-2xl bg-[#161D2F] p-1 border border-[#232D42] font-mono text-xs">
+        {/* Tab Selection */}
+        <div className="flex rounded-xl bg-[#0B1220] p-1 border border-slate-800/60 text-xs font-semibold">
           <button
-            onClick={() => setActiveTab('signin')}
-            className={`flex-1 py-2 rounded-xl transition-all font-bold ${
-              activeTab === 'signin' ? 'bg-gradient-to-r from-sky-500 to-cyan-400 text-slate-950 shadow-cyber-glow' : 'text-slate-400 hover:text-white'
+            onClick={() => { setActiveTab('signin'); setErrorMessage(null); }}
+            className={`flex-1 py-2 rounded-lg transition-all ${
+              activeTab === 'signin' ? 'bg-[#00E5FF] text-[#070B14] font-bold shadow-[0_0_12px_rgba(0,229,255,0.3)]' : 'text-[#94A3B8] hover:text-[#F8FAFC]'
             }`}
           >
             Sign In
           </button>
           <button
-            onClick={() => setActiveTab('signup')}
-            className={`flex-1 py-2 rounded-xl transition-all font-bold ${
-              activeTab === 'signup' ? 'bg-gradient-to-r from-sky-500 to-cyan-400 text-slate-950 shadow-cyber-glow' : 'text-slate-400 hover:text-white'
+            onClick={() => { setActiveTab('pin'); setErrorMessage(null); }}
+            className={`flex-1 py-2 rounded-lg transition-all ${
+              activeTab === 'pin' ? 'bg-[#00E5FF] text-[#070B14] font-bold shadow-[0_0_12px_rgba(0,229,255,0.3)]' : 'text-[#94A3B8] hover:text-[#F8FAFC]'
             }`}
           >
-            Sign Up
+            PIN Access
           </button>
           <button
-            onClick={() => setActiveTab('presets')}
-            className={`flex-1 py-2 rounded-xl transition-all font-bold ${
-              activeTab === 'presets' ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-cyber-glow' : 'text-slate-400 hover:text-white'
+            onClick={() => { setActiveTab('signup'); setErrorMessage(null); }}
+            className={`flex-1 py-2 rounded-lg transition-all ${
+              activeTab === 'signup' ? 'bg-[#00E5FF] text-[#070B14] font-bold shadow-[0_0_12px_rgba(0,229,255,0.3)]' : 'text-[#94A3B8] hover:text-[#F8FAFC]'
             }`}
           >
-            Demo Persona
+            Register
+          </button>
+          <button
+            onClick={() => { setActiveTab('presets'); setErrorMessage(null); }}
+            className={`flex-1 py-2 rounded-lg transition-all ${
+              activeTab === 'presets' ? 'bg-[#7C3AED] text-[#F8FAFC] font-bold shadow-[0_0_12px_rgba(124,58,237,0.3)]' : 'text-[#94A3B8] hover:text-[#F8FAFC]'
+            }`}
+          >
+            Demo
           </button>
         </div>
 
+        {/* Error Alert Box */}
+        {errorMessage && (
+          <div className="p-3.5 rounded-xl bg-[#FF3B3B]/10 border border-[#FF3B3B]/40 text-[#FF3B3B] text-xs text-left flex items-start gap-2.5">
+            <AlertCircle className="w-4 h-4 text-[#FF3B3B] shrink-0 mt-0.5" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
         {/* 1. SIGN IN FORM */}
         {activeTab === 'signin' && (
-          <form onSubmit={handleSignIn} className="space-y-4 font-mono text-xs text-left animate-in fade-in">
-            <div className="space-y-1">
-              <label className="text-slate-400">Email Address</label>
-              <div className="flex items-center gap-2 px-3 py-2.5 bg-[#161D2F] border border-[#232D42] rounded-xl focus-within:border-cyan-400">
-                <Mail className="w-4 h-4 text-slate-500" />
+          <form onSubmit={handleSignIn} className="space-y-4 text-xs text-left">
+            <div className="space-y-1.5">
+              <label className="text-[#94A3B8] font-medium">Email Address</label>
+              <div className="flex items-center gap-2.5 px-3.5 py-2.5 bg-[#151F32] border border-slate-800/80 rounded-xl focus-within:border-[#00E5FF]">
+                <Mail className="w-4 h-4 text-[#64748B]" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="analyst@cyberguard.ai"
-                  className="w-full bg-transparent text-white focus:outline-none"
+                  placeholder="analyst@cybershield.ai"
+                  className="w-full bg-transparent text-[#F8FAFC] focus:outline-none placeholder-[#64748B]"
                   required
                 />
               </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-slate-400">Password</label>
-              <div className="flex items-center gap-2 px-3 py-2.5 bg-[#161D2F] border border-[#232D42] rounded-xl focus-within:border-cyan-400">
-                <Lock className="w-4 h-4 text-slate-500" />
+            <div className="space-y-1.5">
+              <label className="text-[#94A3B8] font-medium">Password</label>
+              <div className="flex items-center gap-2.5 px-3.5 py-2.5 bg-[#151F32] border border-slate-800/80 rounded-xl focus-within:border-[#00E5FF]">
+                <Lock className="w-4 h-4 text-[#64748B]" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-transparent text-white focus:outline-none"
+                  placeholder="••••••••••••"
+                  className="w-full bg-transparent text-[#F8FAFC] focus:outline-none placeholder-[#64748B]"
                   required
                 />
               </div>
             </div>
 
+            {/* Remember Me & Forgot Password */}
+            <div className="flex items-center justify-between pt-1">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded bg-[#151F32] border-slate-700 text-[#00E5FF] focus:ring-0 cursor-pointer"
+                />
+                <span className="text-[#94A3B8]">Remember me</span>
+              </label>
+              <a href="#forgot" onClick={(e) => { e.preventDefault(); addToast('info', 'Password Reset Link', 'Sent to registered email.'); }} className="text-[#00E5FF] hover:underline font-medium">
+                Forgot Password?
+              </a>
+            </div>
+
+            {/* High Contrast Cyan Login Button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 to-cyan-400 text-slate-950 font-extrabold text-xs shadow-cyber-glow hover:scale-105 transition-all mt-2"
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#3B82F6] text-[#070B14] font-extrabold text-sm shadow-[0_0_20px_rgba(0,229,255,0.3)] hover:scale-[1.02] transition-all mt-2 disabled:opacity-50 cursor-pointer"
             >
-              {loading ? 'AUTHENTICATING FIDO2 JWT...' : 'SIGN IN TO CYBERGUARD VAULT'}
+              {loading ? 'AUTHENTICATING...' : 'LOG IN TO SOC DASHBOARD'}
             </button>
           </form>
         )}
 
-        {/* 2. SIGN UP FORM */}
+        {/* 2. PIN ACCESS FORM */}
+        {activeTab === 'pin' && (
+          <form onSubmit={handlePinAuth} className="space-y-4 text-xs text-left">
+            <div className="space-y-1.5">
+              <label className="text-[#94A3B8] font-medium">Security Factor PIN</label>
+              <div className="flex items-center gap-2.5 px-3.5 py-2.5 bg-[#151F32] border border-slate-800/80 rounded-xl focus-within:border-[#00E5FF]">
+                <KeyRound className="w-4 h-4 text-[#00E5FF]" />
+                <input
+                  type="password"
+                  maxLength={6}
+                  value={pinCode}
+                  onChange={(e) => setPinCode(e.target.value)}
+                  placeholder="Enter 6-Digit PIN (e.g. 123456)"
+                  className="w-full bg-transparent text-[#F8FAFC] tracking-widest text-center font-mono text-sm focus:outline-none placeholder-[#64748B]"
+                  required
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 rounded-xl bg-[#00E5FF] text-[#070B14] font-extrabold text-sm shadow-[0_0_20px_rgba(0,229,255,0.3)] hover:scale-[1.02] transition-all mt-2"
+            >
+              {loading ? 'VERIFYING PIN...' : 'VERIFY & ACCESS SYSTEM'}
+            </button>
+          </form>
+        )}
+
+        {/* 3. SIGN UP FORM */}
         {activeTab === 'signup' && (
-          <form onSubmit={handleSignUp} className="space-y-4 font-mono text-xs text-left animate-in fade-in">
+          <form onSubmit={handleSignUp} className="space-y-3.5 text-xs text-left">
             <div className="space-y-1">
-              <label className="text-slate-400">Full Name</label>
-              <div className="flex items-center gap-2 px-3 py-2.5 bg-[#161D2F] border border-[#232D42] rounded-xl focus-within:border-cyan-400">
-                <UserIcon className="w-4 h-4 text-slate-500" />
+              <label className="text-[#94A3B8]">Full Name</label>
+              <div className="flex items-center gap-2 px-3 py-2 bg-[#151F32] border border-slate-800/80 rounded-xl focus-within:border-[#00E5FF]">
+                <UserIcon className="w-4 h-4 text-[#64748B]" />
                 <input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Surya Prakash"
-                  className="w-full bg-transparent text-white focus:outline-none"
+                  className="w-full bg-transparent text-[#F8FAFC] focus:outline-none"
                   required
                 />
               </div>
             </div>
-
             <div className="space-y-1">
-              <label className="text-slate-400">Email Address</label>
-              <div className="flex items-center gap-2 px-3 py-2.5 bg-[#161D2F] border border-[#232D42] rounded-xl focus-within:border-cyan-400">
-                <Mail className="w-4 h-4 text-slate-500" />
+              <label className="text-[#94A3B8]">Email Address</label>
+              <div className="flex items-center gap-2 px-3 py-2 bg-[#151F32] border border-slate-800/80 rounded-xl focus-within:border-[#00E5FF]">
+                <Mail className="w-4 h-4 text-[#64748B]" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="user@domain.com"
-                  className="w-full bg-transparent text-white focus:outline-none"
+                  placeholder="surya@cybershield.ai"
+                  className="w-full bg-transparent text-[#F8FAFC] focus:outline-none"
                   required
                 />
               </div>
             </div>
-
             <div className="space-y-1">
-              <label className="text-slate-400">Password</label>
-              <div className="flex items-center gap-2 px-3 py-2.5 bg-[#161D2F] border border-[#232D42] rounded-xl focus-within:border-cyan-400">
-                <Lock className="w-4 h-4 text-slate-500" />
+              <label className="text-[#94A3B8]">Create Password</label>
+              <div className="flex items-center gap-2 px-3 py-2 bg-[#151F32] border border-slate-800/80 rounded-xl focus-within:border-[#00E5FF]">
+                <Lock className="w-4 h-4 text-[#64748B]" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-transparent text-white focus:outline-none"
+                  placeholder="Minimum 6 characters"
+                  className="w-full bg-transparent text-[#F8FAFC] focus:outline-none"
                   required
                 />
               </div>
             </div>
-
             <div className="space-y-1">
-              <label className="text-slate-400">Select Account Role</label>
+              <label className="text-[#94A3B8]">Account Access Role</label>
               <select
                 value={selectedRole}
                 onChange={(e) => setSelectedRole(e.target.value as Role)}
-                className="w-full p-2.5 rounded-xl bg-[#161D2F] border border-[#232D42] text-white focus:outline-none focus:border-cyan-400 cursor-pointer"
+                className="w-full px-3 py-2 bg-[#151F32] border border-slate-800/80 rounded-xl text-[#F8FAFC] focus:outline-none focus:border-[#00E5FF]"
               >
-                <option value="USER">Consumer Security Guard (Personal)</option>
-                <option value="SECURITY_ANALYST">SOC Lead Analyst (Enterprise)</option>
-                <option value="ADMIN">CISO System Admin (Full Vault Access)</option>
+                <option value="SECURITY_ANALYST">SOC Security Lead / Analyst</option>
+                <option value="ADMIN">CISO Administrator</option>
+                <option value="USER">Consumer Security User</option>
               </select>
             </div>
-
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-400 text-slate-950 font-extrabold text-xs shadow-cyber-glow hover:scale-105 transition-all mt-2"
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#3B82F6] text-[#070B14] font-extrabold text-sm shadow-[0_0_20px_rgba(0,229,255,0.3)] hover:scale-[1.02] transition-all cursor-pointer disabled:opacity-50"
             >
-              {loading ? 'CREATING ZERO-TRUST VAULT...' : 'CREATE FREE CYBERGUARD ACCOUNT'}
+              {loading ? 'CREATING ACCOUNT...' : 'CREATE & SIGN IN'}
             </button>
           </form>
         )}
 
-        {/* 3. DEMO PRESETS */}
+        {/* 4. DEMO PERSONAS */}
+        {/* 4. DEMO PERSONAS */}
         {activeTab === 'presets' && (
-          <div className="space-y-3 animate-in fade-in">
-            <p className="text-xs text-slate-400">Instant single-click persona authentication for hackathons & demos:</p>
-
+          <div className="space-y-2.5 text-xs">
+            <p className="text-[#94A3B8]">Click any preset persona for instant login:</p>
             <button
               onClick={() => handlePresetSelect('SECURITY_ANALYST')}
-              className="w-full p-4 rounded-2xl bg-[#161D2F] border border-amber-500/30 hover:border-amber-500 text-left transition-all flex items-center justify-between group"
+              className="w-full p-3 rounded-xl bg-[#151F32] border border-slate-800 hover:border-[#00E5FF] text-left flex items-center justify-between group transition-all"
             >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400">
-                  <Terminal className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-white">SOC Analyst Persona</p>
-                  <p className="text-[11px] font-mono text-slate-400">analyst@cyberguard.demo</p>
-                </div>
+              <div>
+                <p className="font-bold text-[#F8FAFC]">SOC Analyst Persona</p>
+                <p className="text-[10px] text-[#94A3B8]">Full access to SOC Command Center</p>
               </div>
-              <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition-colors" />
-            </button>
-
-            <button
-              onClick={() => handlePresetSelect('USER')}
-              className="w-full p-4 rounded-2xl bg-[#161D2F] border border-sky-500/30 hover:border-sky-500 text-left transition-all flex items-center justify-between group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-sky-500/20 text-cyan-400">
-                  <UserCheck className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-white">Consumer User Persona</p>
-                  <p className="text-[11px] font-mono text-slate-400">user@cyberguard.demo</p>
-                </div>
-              </div>
-              <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-cyan-400 transition-colors" />
+              <ArrowRight className="w-4 h-4 text-[#64748B] group-hover:text-[#00E5FF]" />
             </button>
 
             <button
               onClick={() => handlePresetSelect('ADMIN')}
-              className="w-full p-4 rounded-2xl bg-[#161D2F] border border-emerald-500/30 hover:border-emerald-500 text-left transition-all flex items-center justify-between group"
+              className="w-full p-3 rounded-xl bg-[#151F32] border border-slate-800 hover:border-[#7C3AED] text-left flex items-center justify-between group transition-all"
             >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400">
-                  <Shield className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-white">System Admin Persona</p>
-                  <p className="text-[11px] font-mono text-slate-400">admin@cyberguard.demo</p>
-                </div>
+              <div>
+                <p className="font-bold text-[#F8FAFC]">CISO Admin Persona</p>
+                <p className="text-[10px] text-[#94A3B8]">Executive risk & audit reports</p>
               </div>
-              <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors" />
+              <ArrowRight className="w-4 h-4 text-[#64748B] group-hover:text-[#7C3AED]" />
             </button>
           </div>
         )}
+
+        {/* CLICKABLE HOMEPAGE REDIRECT CARD */}
+        <div 
+          onClick={() => navigate('/')}
+          className="w-full p-4 rounded-2xl bg-gradient-to-r from-[#0B1220] via-[#151F32] to-[#0B1220] border border-[#00E5FF]/50 hover:border-[#00E5FF] shadow-[0_0_20px_rgba(0,229,255,0.2)] hover:shadow-[0_0_35px_rgba(0,229,255,0.45)] transition-all cursor-pointer group flex items-center justify-between font-mono text-left pt-3 mt-4"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-[#00E5FF]/10 border border-[#00E5FF]/50 text-[#00E5FF] group-hover:scale-110 transition-transform">
+              <Globe className="w-5 h-5 text-[#00E5FF]" />
+            </div>
+            <div>
+              <p className="font-orbitron font-extrabold text-xs text-white group-hover:text-[#00E5FF] transition-colors flex items-center gap-1.5">
+                <span>RETURN TO HOMEPAGE</span>
+                <span className="px-1.5 py-0.5 bg-[#00E5FF]/20 text-[#00E5FF] border border-[#00E5FF]/40 rounded text-[9px] font-bold">CYBERGUARD AI</span>
+              </p>
+              <p className="text-[10px] text-[#94A3B8]">Click card to explore 12 Defense Armory Modules & Specs</p>
+            </div>
+          </div>
+          <ArrowRight className="w-4 h-4 text-[#00E5FF] group-hover:translate-x-1 transition-transform shrink-0" />
+        </div>
       </div>
     </div>
   );
